@@ -16,10 +16,6 @@
   <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=kanywst&layout=compact&theme=transparent&hide_border=true&langs_count=6&hide=jupyter%20notebook,tex,css,php&exclude_repo=Pacman-AI" height="180"/>
 </p>
 
-<p align="center">
-  <img src="https://github-readme-streak-stats.herokuapp.com?user=kanywst&theme=dark&hide_border=true&background=00000000" height="180"/>
-</p>
-
 ---
 
 ### 🧰 Tech Stack
