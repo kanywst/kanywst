@@ -21,7 +21,7 @@
 ### 🧰 Tech Stack
 
 <p align="center">
-  <img src="https://skillicons.dev/icons?i=ansible,docker,git,go,kubernetes,linux,prometheus,redhat,sublime,vscode" />
+  <img src="https://skillicons.dev/icons?i=ansible,docker,git,go,grafana,kubernetes,linux,prometheus,redhat,sublime,vscode" />
 </p>
 
 <!-- --- -->
