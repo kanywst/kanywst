@@ -1,13 +1,9 @@
-<h1 align="center">👋 Hi, I'm <strong>kanywst</strong></h1>
+<div align="right">
+  <img src="https://komarev.com/ghpvc/?username=kanywst" />
+  <a href="https://wakatime.com/@92a27737-1fa2-46d6-935b-0ff292e5f7c1"><img src="https://wakatime.com/badge/user/92a27737-1fa2-46d6-935b-0ff292e5f7c1.svg" alt="Total time coded since Dec 20 2025" /></a>
+</div>
 
-<p align="center">
-  <a href="https://wakatime.com/badge/user/92a27737-1fa2-46d6-935b-0ff292e5f7c1.svg" target="_blank">
-    <img src="https://wakatime.com/badge/user/018d7fcd-3625-4d05-9e6b-2a3cebe45299.svg" alt="WakaTime Badge"/>
-  </a>
-  <a href="https://github.com/kanywst?tab=repositories" target="_blank">
-    <img src="https://img.shields.io/badge/Total%20Stars-–-ff69b4?style=for-the-badge&logo=github" alt="GitHub Stars"/>
-  </a>
-</p>
+<h1 align="center">👋 Hi, I'm <strong>kanywst</strong></h1>
 
 <p align="center">
   <!-- Dynamic typing intro -->
@@ -42,10 +38,4 @@
 ## 🧰 Tech Stack
 <p align="center">
   <img src="https://skillicons.dev/icons?i=ansible,docker,git,go,grafana,kubernetes,linux,prometheus,redhat,vscode" />
-</p>
-
----
-
-<p align="center">
-  <img src="https://visitor-badge.laobi.icu/badge?page_id=kanywst.kanywst" alt="visitors" />
 </p>
