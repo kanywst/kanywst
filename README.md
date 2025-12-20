@@ -1,6 +1,6 @@
 <div align="right">
   <img src="https://komarev.com/ghpvc/?username=kanywst" />
-  <img src="https://wakatime.com/badge/user/92a27737-1fa2-46d6-935b-0ff292e5f7c1.svg" alt="Total time coded since Dec 20 2025" />
+  <a href="https://wakatime.com/@92a27737-1fa2-46d6-935b-0ff292e5f7c1"><img src="https://wakatime.com/badge/user/92a27737-1fa2-46d6-935b-0ff292e5f7c1.svg" alt="Total time coded since Dec 20 2025" /></a>
 </div>
 
 <h1 align="center">👋 Hi, I'm <strong>kanywst</strong></h1>
