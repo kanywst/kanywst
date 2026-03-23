@@ -22,7 +22,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr><td>–</td><td>–</td><td><em>No messages yet. Be the first!</em></td></tr>
+    <tr><td><code>2026-03-23</code></td><td><a href="https://github.com/kanywst">@kanywst</a></td><td><a href="https://github.com/kanywst/kanywst/issues/2">‼️</a></td></tr>
   </tbody>
 </table>
 <!-- GUESTBOOK:END -->
