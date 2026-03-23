@@ -40,28 +40,37 @@ def parse_message(body: str) -> str:
 def build_row(user: str, message: str, ts: str, issue_number: str) -> str:
     profile_url = f"https://github.com/{user}"
     issue_url = f"https://github.com/kanywst/kanywst/issues/{issue_number}"
-    return f"| `{ts}` | [@{user}]({profile_url}) | [{message}]({issue_url}) |"
+    return f"    <tr><td><code>{ts}</code></td><td><a href=\"{profile_url}\">@{user}</a></td><td><a href=\"{issue_url}\">{message}</a></td></tr>"
 
 
 def parse_existing_rows(block: str) -> list[str]:
     """マーカー間のブロックからデータ行だけを抽出する。"""
     rows = []
     for line in block.splitlines():
-        stripped = line.strip()
-        # データ行: | ` で始まる行（タイムスタンプ付き）
-        if stripped.startswith("| `"):
-            rows.append(stripped)
+        # データ行: <tr><td><code> で始まる行（タイムスタンプ付き）
+        if "<tr><td><code>" in line:
+            rows.append(line)
     return rows
 
 
 def build_table(rows: list[str]) -> str:
     """行リストから整形済みテーブルブロックを生成する。"""
-    header = "| 🕐   | 👤   | 💬                                |"
-    sep    = "| --- | --- | -------------------------------- |"
+    header = """<table align="center">
+  <thead>
+    <tr>
+      <th>🕐</th>
+      <th>👤</th>
+      <th>💬</th>
+    </tr>
+  </thead>
+  <tbody>"""
+    footer = """  </tbody>
+</table>"""
     if not rows:
-        empty = "| –   | –   | *No messages yet. Be the first!* |"
-        return "\n".join([header, sep, empty])
-    return "\n".join([header, sep] + rows)
+        empty = "    <tr><td>–</td><td>–</td><td><em>No messages yet. Be the first!</em></td></tr>"
+        return f"{header}\n{empty}\n{footer}"
+    return f"{header}\n" + "\n".join(rows) + f"\n{footer}"
+
 
 
 def update_readme(new_row: str) -> None:

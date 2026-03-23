@@ -13,9 +13,16 @@
 <br>
 
 <!-- GUESTBOOK:START -->
-| 🕐   | 👤   | 💬                                |
-| --- | --- | -------------------------------- |
-| –   | –   | *No messages yet. Be the first!* |
+<table align="center">
+  <thead>
+    <tr>
+      <th>🕐</th>
+      <th>👤</th>
+      <th>💬</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>–</td><td>–</td><td><em>No messages yet. Be the first!</em></td></tr>
+  </tbody>
+</table>
 <!-- GUESTBOOK:END -->
-
-</div>
