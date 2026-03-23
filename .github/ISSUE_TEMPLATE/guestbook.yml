@@ -1,0 +1,25 @@
+name: 📮 Guest Book
+description: Leave a message on kanywst's profile ✨
+title: "📮 [Guest Book]"
+labels: ["guestbook"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ✉️ Thanks for stopping by!
+        Just fill in one field below and submit — your message will appear on my profile automatically.
+
+  - type: input
+    id: message
+    attributes:
+      label: "💬 Your message"
+      description: "Say hi, leave a quote, or just drop an emoji — anything goes!"
+      placeholder: "Hello from the internet 👋"
+    validations:
+      required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        > 🤖 A bot will process your message and add it to the guest book within a minute.
+        > The issue will be closed automatically — that's expected!

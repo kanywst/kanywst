@@ -1,0 +1,51 @@
+name: Guest Book
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  add-message:
+    if: contains(github.event.issue.labels.*.name, 'guestbook')
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Update guest book
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_USER: ${{ github.event.issue.user.login }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: python scripts/update_guestbook.py
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --cached --quiet || git commit -m "📮 New guest book entry from @${{ github.event.issue.user.login }}"
+          git push
+
+      - name: Thank the visitor
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            Thanks for signing the guest book, @${{ github.event.issue.user.login }}! 🎉
+            Your message has been added to [my profile](https://github.com/kanywst). ✨
+
+      - name: Close issue
+        uses: peter-evans/close-issue@v3
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          comment: "✅ Added to the guest book!"
