@@ -10,8 +10,6 @@
 
 <sub>↑ opens a GitHub Issue form · fill in 1 field · auto-added to the list below</sub>
 
-</div>
-
 <br>
 
 <!-- GUESTBOOK:START -->
@@ -19,3 +17,5 @@
 | --- | --- | -------------------------------- |
 | –   | –   | *No messages yet. Be the first!* |
 <!-- GUESTBOOK:END -->
+
+</div>
