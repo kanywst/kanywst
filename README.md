@@ -3,8 +3,7 @@
 <h1>👋 Hi, I'm kanywst</h1>
 
 <p>
-  I'm deeply interested in <b>Identity, Authorization (OAuth/OIDC, SPIFFE/SPIRE), Cloud Native Security, and Low-Level Architecture (Go/Rust)</b>.<br>
-  Feel free to explore my deep-dive articles and repositories.
+  Identity, Authorization, and Cloud Native Security.
 </p>
 
 <br>
