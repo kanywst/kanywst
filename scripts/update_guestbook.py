@@ -11,6 +11,7 @@ GitHub Actions から呼び出され、Issue の内容を README.md のゲスト
 
 import os
 import re
+import html
 from datetime import datetime, timezone
 
 README_PATH = "README.md"
@@ -38,9 +39,11 @@ def parse_message(body: str) -> str:
 
 
 def build_row(user: str, message: str, ts: str, issue_number: str) -> str:
-    profile_url = f"https://github.com/{user}"
+    safe_user = html.escape(user)
+    safe_message = html.escape(message)
+    profile_url = f"https://github.com/{safe_user}"
     issue_url = f"https://github.com/kanywst/kanywst/issues/{issue_number}"
-    return f"    <tr><td><code>{ts}</code></td><td><a href=\"{profile_url}\">@{user}</a></td><td><a href=\"{issue_url}\">{message}</a></td></tr>"
+    return f"    <tr><td><code>{ts}</code></td><td><a href=\"{profile_url}\">@{safe_user}</a></td><td><a href=\"{issue_url}\">{safe_message}</a></td></tr>"
 
 
 def parse_existing_rows(block: str) -> list[str]:

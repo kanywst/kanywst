@@ -1,6 +1,9 @@
-# 👋 kanywst
+# 👋 Hi, I'm kanywst
 
-<div align="center">
+Welcome to my GitHub profile! I'm a developer who loves building cool things.
+Feel free to look around my repositories.
+
+### 📖 Guestbook
 
 > **Leave a trace.** If you visited, say hi — takes 10 seconds.
 
