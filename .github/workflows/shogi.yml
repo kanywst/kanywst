@@ -1,4 +1,4 @@
-name: Connect Four
+name: Shogi
 
 on:
   issues:
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   play:
-    if: startsWith(github.event.issue.title, 'connect4|')
+    if: startsWith(github.event.issue.title, 'shogi|')
     runs-on: ubuntu-latest
 
     steps:
@@ -34,17 +34,17 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           {
-            echo "message<<EOF"
-            python scripts/connect_four.py
-            echo "EOF"
+            echo "message<<SHOGI_EOF"
+            python scripts/shogi.py
+            echo "SHOGI_EOF"
           } >> "$GITHUB_OUTPUT"
 
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md .github/connect_four.json
-          git diff --cached --quiet || git commit -m "🔴 Connect Four move by @${{ github.event.issue.user.login }}"
+          git add README.md .github/shogi.json
+          git diff --cached --quiet || git commit -m "将棋: @${{ github.event.issue.user.login }}"
           git push
 
       - name: Close the issue
@@ -54,4 +54,4 @@ jobs:
           comment: |
             ${{ steps.move.outputs.message }}
 
-            Thanks for playing, @${{ github.event.issue.user.login }}. The board is on [my profile](https://github.com/kanywst).
+            @${{ github.event.issue.user.login }} ありがとうございます。盤は[プロフィール](https://github.com/kanywst)にあります。
