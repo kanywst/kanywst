@@ -8,12 +8,12 @@
 
 <p align="center">I work on identity, authorization, and cloud native security, mostly in Go and increasingly in Rust. Projects and writing are at <a href="https://kanywst.github.io/">kanywst.github.io</a>.</p>
 
-<h2 align="center">将棋</h2>
+<h2 align="center">Shogi</h2>
 
 <!-- SHOGI:START -->
-<p align="center">先手の番です。だれでも指せます。</p>
+<p align="center">Black to move.</p>
 
-<p align="center">後手の持ち駒: なし</p>
+<p align="center">White in hand: none</p>
 
 <table align="center">
 <tr><th></th><th>9</th><th>8</th><th>7</th><th>6</th><th>5</th><th>4</th><th>3</th><th>2</th><th>1</th></tr>
@@ -28,11 +28,11 @@
 <tr><th>i</th><td><a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Csel+9i&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/koma/sL.svg" width="44" height="48" alt="香"></a></td><td><a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Csel+8i&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/koma/sN.svg" width="44" height="48" alt="桂"></a></td><td><a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Csel+7i&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/koma/sS.svg" width="44" height="48" alt="銀"></a></td><td><a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Csel+6i&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/koma/sG.svg" width="44" height="48" alt="金"></a></td><td><a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Csel+5i&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/koma/sK.svg" width="44" height="48" alt="王"></a></td><td><a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Csel+4i&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/koma/sG.svg" width="44" height="48" alt="金"></a></td><td><a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Csel+3i&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/koma/sS.svg" width="44" height="48" alt="銀"></a></td><td><a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Csel+2i&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/koma/sN.svg" width="44" height="48" alt="桂"></a></td><td><a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Csel+1i&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/koma/sL.svg" width="44" height="48" alt="香"></a></td></tr>
 </table>
 
-<p align="center">先手の持ち駒: なし</p>
+<p align="center">Black in hand: none</p>
 
-<p align="center">駒をクリックして、次に行き先をクリック。30 秒ほどで盤が変わります。　<a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Cresign&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds.">投了する</a></p>
+<p align="center">Click a piece, then a square. Takes about 30 seconds. · <a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Cresign&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds.">Resign</a></p>
 
-<p align="center">通算 先手 0勝　後手 0勝　0局　指した人 0</p>
+<p align="center">Black 0 · White 0 · 0 games · 0 players</p>
 <!-- SHOGI:END -->
 
 <h2 align="center">Guestbook</h2>

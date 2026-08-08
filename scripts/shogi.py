@@ -34,9 +34,11 @@ import os
 import pathlib
 import re
 import sys
+from datetime import datetime, timezone
 
 README_PATH = pathlib.Path("README.md")
 STATE_PATH = pathlib.Path(".github/shogi.json")
+LOG_PATH = pathlib.Path(".github/shogi-log.txt")
 
 START_MARKER = "<!-- SHOGI:START -->"
 END_MARKER = "<!-- SHOGI:END -->"
@@ -49,7 +51,11 @@ REPO = "kanywst/kanywst"
 ASSET = f"https://raw.githubusercontent.com/{REPO}/main/.github/koma"
 BODY = "Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds."
 
-SIDE_NAME = {SENTE: "先手", GOTE: "後手"}
+SIDE_NAME = {SENTE: "Black", GOTE: "White"}
+LETTER = {"P": "P", "L": "L", "N": "N", "S": "S", "G": "G", "B": "B", "R": "R", "K": "K",
+          "+P": "+P", "+L": "+L", "+N": "+N", "+S": "+S", "+B": "+B", "+R": "+R"}
+WORD = {"P": "pawn", "L": "lance", "N": "knight", "S": "silver",
+        "G": "gold", "B": "bishop", "R": "rook"}
 HAND_ORDER = ["R", "B", "G", "S", "N", "L", "P"]
 KANJI = {
     "P": "歩", "L": "香", "N": "桂", "S": "銀",
@@ -148,6 +154,7 @@ def blank_state() -> dict:
         "winner": None,
         "reason": None,
         "last": None,
+        "moves": [],
         "games": 0,
         "record": {SENTE: 0, GOTE: 0},
         "players": [],
@@ -388,7 +395,7 @@ def render_hand(state: dict, side: str) -> str:
     hand = state["hands"].get(side, {})
     held = [(p, n) for p in HAND_ORDER for n in [hand.get(p, 0)] if n > 0]
     if not held:
-        return f"{SIDE_NAME[side]}の持ち駒: なし"
+        return f"{SIDE_NAME[side]} in hand: none"
 
     selectable = (
         side == state["turn"]
@@ -402,7 +409,7 @@ def render_hand(state: dict, side: str) -> str:
             parts.append(f'<a href="{issue_url(f"sel *{piece}")}">{label}</a>')
         else:
             parts.append(label)
-    return f"{SIDE_NAME[side]}の持ち駒: " + "　".join(parts)
+    return f"{SIDE_NAME[side]} in hand: " + " ".join(parts)
 
 
 def render(state: dict) -> str:
@@ -411,18 +418,17 @@ def render(state: dict) -> str:
     lines = []
 
     if status != "playing":
-        reason = state.get("reason", "詰み")
-        headline = f"{reason}。{SIDE_NAME[state['winner']]}の勝ち。"
+        headline = f"{state.get('reason', 'Checkmate')}. {SIDE_NAME[state['winner']]} wins."
     elif state["pending"]:
-        headline = "成りますか。"
+        headline = "Promote?"
     elif state["selected"]:
         if state["selected"].startswith("*"):
-            headline = f"{KANJI[state['selected'][1:]]}を打ちます。打てる升が ⭕ です。"
+            headline = f"Dropping a {WORD[state['selected'][1:]]}. Circles are legal."
         else:
-            headline = f"{state['selected']} の駒を選びました。行ける升が ⭕ です。"
+            headline = f"{state['selected']} selected. Circles are legal."
     else:
-        check = "王手。" if in_check(state["board"], turn) else ""
-        headline = f"{check}{SIDE_NAME[turn]}の番です。だれでも指せます。"
+        check = "Check. " if in_check(state["board"], turn) else ""
+        headline = f"{check}{SIDE_NAME[turn]} to move."
 
     lines.append(f'<p align="center">{headline}</p>')
     lines.append("")
@@ -438,21 +444,21 @@ def render(state: dict) -> str:
     elif state["pending"]:
         yes = issue_url("pro yes")
         no = issue_url("pro no")
-        call = f'<a href="{yes}">成る</a>　<a href="{no}">成らず</a>'
+        call = f'<a href="{yes}">Yes</a> · <a href="{no}">No</a>'
     elif state["selected"]:
-        call = f'<a href="{issue_url("cancel")}">選び直す</a>'
+        call = f'<a href="{issue_url("cancel")}">Pick something else</a>'
     else:
-        # 詰みまで行かない局面で盤が止まらないよう、投了できるようにしておく
+        # 詰まない局面で盤が止まらないよう投了を置く
         call = (
-            "駒をクリックして、次に行き先をクリック。30 秒ほどで盤が変わります。"
-            f'　<a href="{issue_url("resign")}">投了する</a>'
+            "Click a piece, then a square. Takes about 30 seconds."
+            f' · <a href="{issue_url("resign")}">Resign</a>'
         )
 
     lines.append(f'<p align="center">{call}</p>')
     lines.append("")
 
     if state["last"]:
-        lines.append(f'<p align="center">前の手: {state["last"]}</p>')
+        lines.append(f'<p align="center">Last move: {state["last"]}</p>')
         lines.append("")
 
     # 通算成績は対局をまたいで残す。1 局終わるたびに消えると記録にならない。
@@ -460,8 +466,8 @@ def render(state: dict) -> str:
     games = state.get("games", 0)
     played = len(state.get("players", []))
     lines.append(
-        f'<p align="center">通算 先手 {record.get(SENTE, 0)}勝　後手 {record.get(GOTE, 0)}勝'
-        f'　{games}局　指した人 {played}</p>'
+        f'<p align="center">Black {record.get(SENTE, 0)} · White {record.get(GOTE, 0)}'
+        f' · {games} games · {played} players</p>'
     )
     return "\n".join(lines)
 
@@ -481,16 +487,34 @@ def write_readme(state: dict) -> None:
 # 1 手進める
 # --------------------------------------------------------------------------
 
-RANK_KANJI = "一二三四五六七八九"
-MARK = {SENTE: "▲", GOTE: "△"}
+def describe(kind: str, to, promote: bool, dropped: bool, captured: bool) -> str:
+    """P-7f, Bx2b+, G*5b."""
+    join = "*" if dropped else ("x" if captured else "-")
+    return f"{LETTER[kind]}{join}{to_sq(*to)}{'+' if promote else ''}"
 
 
-def describe(state: dict, frm, to, piece_kind: str, promote: bool, dropped: bool) -> str:
-    """▲7六歩 の形。棋譜の書き方に合わせて筋は算用数字、段は漢数字。"""
-    row, col = to
-    square = f"{N - col}{RANK_KANJI[row]}"
-    suffix = "打" if dropped else ("成" if promote else "")
-    return f"{MARK[state['turn']]}{square}{KANJI[piece_kind]}{suffix}"
+def record_move(state: dict, notation: str) -> str:
+    state.setdefault("moves", []).append(notation)
+    return notation
+
+
+def append_log(state: dict) -> None:
+    """終わった一局をリポジトリのログに書き足す。"""
+    stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    number = state.get("games", 0)
+    moves = state.get("moves", [])
+    played = [m for m in moves if m != "resigns"]
+    header = (
+        f"{stamp}  game {number}  "
+        f"{SIDE_NAME[state['winner']]} wins by {state['reason'].lower()}  "
+        f"{len(played)} move{'' if len(played) == 1 else 's'}"
+    )
+    body = "\n".join(
+        "  " + " ".join(moves[i:i + 12]) for i in range(0, len(moves), 12)
+    )
+    LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with LOG_PATH.open("a", encoding="utf-8") as f:
+        f.write(header + "\n" + (body + "\n" if body else "") + "\n")
 
 
 def record_win(state: dict, winner: str, reason: str) -> None:
@@ -500,6 +524,7 @@ def record_win(state: dict, winner: str, reason: str) -> None:
     state["games"] = state.get("games", 0) + 1
     record = state.setdefault("record", {SENTE: 0, GOTE: 0})
     record[winner] = record.get(winner, 0) + 1
+    append_log(state)
 
 
 def finish_turn(state: dict, note: str) -> str:
@@ -509,10 +534,10 @@ def finish_turn(state: dict, note: str) -> str:
     state["pending"] = None
 
     if is_checkmate(state, other):
-        record_win(state, GOTE if other == SENTE else SENTE, "詰み")
-        return f"{note} 詰みです。{SIDE_NAME[state['winner']]}の勝ち。"
+        record_win(state, GOTE if other == SENTE else SENTE, "Checkmate")
+        return f"{note} Checkmate. {SIDE_NAME[state['winner']]} wins."
     if in_check(state["board"], other):
-        return f"{note} 王手。"
+        return f"{note} Check."
     return note
 
 
@@ -522,7 +547,7 @@ def play(state: dict, command: str, user: str) -> str:
 
     if verb == "new":
         if state["status"] == "playing":
-            return "まだ対局中です。指し手をどうぞ。"
+            return "That game is still going. Take a turn instead."
         keep_players = state.get("players", [])
         keep_games = state.get("games", 0)
         keep_record = state.get("record", {SENTE: 0, GOTE: 0})
@@ -532,99 +557,101 @@ def play(state: dict, command: str, user: str) -> str:
         fresh["record"] = keep_record
         state.clear()
         state.update(fresh)
-        return "新しい盤面です。先手からどうぞ。"
+        return "New board. Black starts."
 
     if state["status"] != "playing":
-        return "この対局はもう終わっています。新しい対局を始めてください。"
+        return "That game is over. Start a new one."
 
     if verb == "resign":
         loser = state["turn"]
         winner = GOTE if loser == SENTE else SENTE
-        state["last"] = f"{MARK[loser]}投了"
-        record_win(state, winner, "投了")
+        state["last"] = record_move(state, "resigns")
+        record_win(state, winner, "Resignation")
         state["selected"] = None
         state["pending"] = None
-        return f"{SIDE_NAME[loser]}の投了です。{SIDE_NAME[winner]}の勝ち。"
+        return f"{SIDE_NAME[loser]} resigns. {SIDE_NAME[winner]} wins."
 
     if verb == "cancel":
         state["selected"] = None
         state["pending"] = None
-        return "選択をやめました。"
+        return "Cleared."
 
     if verb == "sel":
         if state["pending"]:
-            return "先に成るかどうかを決めてください。"
+            return "Answer the promotion question first."
         target = parts[1]
         if target.startswith("*"):
             piece = target[1:]
             if state["hands"][state["turn"]].get(piece, 0) < 1:
-                return f"{KANJI.get(piece, piece)}は持っていません。"
+                return f"No {WORD[piece]} in hand."
             if not legal_drops(state, piece):
-                return f"{KANJI[piece]}を打てる升がありません。"
+                return f"Nowhere to drop a {WORD[piece]}."
         else:
             row, col = from_sq(target)
             cell = state["board"][row][col]
             if not cell or side_of(cell) != state["turn"]:
-                return f"{target} に{SIDE_NAME[state['turn']]}の駒がありません。"
+                return f"No {SIDE_NAME[state['turn']]} piece on {target}."
             if not legal_moves_from(state, (row, col)):
-                return f"{target} の駒は動けません。"
+                return f"The piece on {target} has no legal move."
         state["selected"] = target
-        return "選びました。行き先をクリックしてください。"
+        return "Selected. Now click a square."
 
     if verb == "mv":
         selected = state["selected"]
         if not selected:
-            return "先に駒を選んでください。"
+            return "Pick a piece first."
         arg = parts[1]
 
         if selected.startswith("*"):
             piece = selected[1:]
             to = from_sq(arg[-2:])
             if to not in legal_drops(state, piece):
-                return "そこには打てません。"
+                return "Cannot drop there."
             state["board"][to[0]][to[1]] = state["turn"] + piece
             state["hands"][state["turn"]][piece] -= 1
             if state["hands"][state["turn"]][piece] == 0:
                 del state["hands"][state["turn"]][piece]
-            state["last"] = describe(state, None, to, piece, False, True)
+            state["last"] = record_move(state, describe(piece, to, False, True, False))
             state["selected"] = None
-            return finish_turn(state, f"{state['last']}。")
+            return finish_turn(state, f"{state['last']}.")
 
         frm = from_sq(selected)
         to = from_sq(arg[-2:])
         if to not in legal_moves_from(state, frm):
-            return "そこへは動けません。"
+            return "Cannot move there."
 
         kind = kind_of(state["board"][frm[0]][frm[1]])
+        captured = bool(state["board"][to[0]][to[1]])
         if must_promote(kind, to[0], state["turn"]):
             apply_move(state["board"], state["hands"], frm, to, True)
-            state["last"] = describe(state, frm, to, kind, True, False)
+            state["last"] = record_move(state, describe(kind, to, True, False, captured))
             state["selected"] = None
-            return finish_turn(state, f"{state['last']}。")
+            return finish_turn(state, f"{state['last']}.")
 
         if can_promote(kind, frm[0], to[0], state["turn"]):
             state["pending"] = {"from": selected, "to": to_sq(*to)}
-            return "成るかどうかを選んでください。"
+            return "Promote or not?"
 
         apply_move(state["board"], state["hands"], frm, to, False)
-        state["last"] = describe(state, frm, to, kind, False, False)
+        state["last"] = record_move(state, describe(kind, to, False, False, captured))
         state["selected"] = None
-        return finish_turn(state, f"{state['last']}。")
+        return finish_turn(state, f"{state['last']}.")
 
     if verb == "pro":
         if not state["pending"]:
-            return "いま成るかどうかを聞かれていません。"
+            return "Nothing is waiting on a promotion answer."
         promote = parts[1] == "yes"
         frm = from_sq(state["pending"]["from"])
         to = from_sq(state["pending"]["to"])
         kind = kind_of(state["board"][frm[0]][frm[1]])
+        captured = bool(state["board"][to[0]][to[1]])
         apply_move(state["board"], state["hands"], frm, to, promote)
-        state["last"] = describe(state, frm, to, kind, promote, False)
+        state["last"] = record_move(state, describe(kind, to, promote, False, captured))
         state["pending"] = None
         state["selected"] = None
-        return finish_turn(state, f"{state['last']}。")
+        return finish_turn(state, f"{state['last']}.")
 
-    return f"'{command}' は指し手として読めません。"
+    return f"Could not read '{command}' as a move."
 
 
 def parse(title: str) -> str | None:
