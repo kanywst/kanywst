@@ -17,7 +17,11 @@ Issue タイトル:
   shogi|mv 7g7f     - 選んだ駒を動かす / 打つ
   shogi|pro yes|no  - 成るかどうかを答える
   shogi|cancel      - 選択をやめる
+  shogi|resign      - 投了する。詰みまで行かない局面で盤が止まるのを防ぐ
   shogi|new         - 決着後に次の対局を始める
+
+勝敗は対局をまたいで .github/shogi.json に残る。終局しても自動では初期化せず、
+だれかが「次の対局を始める」を押すまで結果を出したままにする。
 
 環境変数:
   ISSUE_TITLE / ISSUE_USER / ISSUE_NUMBER
@@ -142,8 +146,10 @@ def blank_state() -> dict:
         "pending": None,
         "status": "playing",
         "winner": None,
+        "reason": None,
         "last": None,
         "games": 0,
+        "record": {SENTE: 0, GOTE: 0},
         "players": [],
     }
 
@@ -404,8 +410,9 @@ def render(state: dict) -> str:
     status = state["status"]
     lines = []
 
-    if status == "checkmate":
-        headline = f"{SIDE_NAME[state['winner']]}の勝ち。詰みました。"
+    if status != "playing":
+        reason = state.get("reason", "詰み")
+        headline = f"{reason}。{SIDE_NAME[state['winner']]}の勝ち。"
     elif state["pending"]:
         headline = "成りますか。"
     elif state["selected"]:
@@ -426,7 +433,7 @@ def render(state: dict) -> str:
     lines.append(f'<p align="center">{render_hand(state, SENTE)}</p>')
     lines.append("")
 
-    if status == "checkmate":
+    if status != "playing":
         call = f'<a href="{issue_url("new")}">次の対局を始める</a>'
     elif state["pending"]:
         yes = issue_url("pro yes")
@@ -435,7 +442,11 @@ def render(state: dict) -> str:
     elif state["selected"]:
         call = f'<a href="{issue_url("cancel")}">選び直す</a>'
     else:
-        call = "駒をクリックして、次に行き先をクリック。30 秒ほどで盤が変わります。"
+        # 詰みまで行かない局面で盤が止まらないよう、投了できるようにしておく
+        call = (
+            "駒をクリックして、次に行き先をクリック。30 秒ほどで盤が変わります。"
+            f'　<a href="{issue_url("resign")}">投了する</a>'
+        )
 
     lines.append(f'<p align="center">{call}</p>')
     lines.append("")
@@ -444,9 +455,14 @@ def render(state: dict) -> str:
         lines.append(f'<p align="center">前の手: {state["last"]}</p>')
         lines.append("")
 
+    # 通算成績は対局をまたいで残す。1 局終わるたびに消えると記録にならない。
+    record = state.get("record", {SENTE: 0, GOTE: 0})
     games = state.get("games", 0)
     played = len(state.get("players", []))
-    lines.append(f'<p align="center">対局 {games}　指した人 {played}</p>')
+    lines.append(
+        f'<p align="center">通算 先手 {record.get(SENTE, 0)}勝　後手 {record.get(GOTE, 0)}勝'
+        f'　{games}局　指した人 {played}</p>'
+    )
     return "\n".join(lines)
 
 
@@ -477,6 +493,15 @@ def describe(state: dict, frm, to, piece_kind: str, promote: bool, dropped: bool
     return f"{MARK[state['turn']]}{square}{KANJI[piece_kind]}{suffix}"
 
 
+def record_win(state: dict, winner: str, reason: str) -> None:
+    state["status"] = "over"
+    state["winner"] = winner
+    state["reason"] = reason
+    state["games"] = state.get("games", 0) + 1
+    record = state.setdefault("record", {SENTE: 0, GOTE: 0})
+    record[winner] = record.get(winner, 0) + 1
+
+
 def finish_turn(state: dict, note: str) -> str:
     other = GOTE if state["turn"] == SENTE else SENTE
     state["turn"] = other
@@ -484,9 +509,7 @@ def finish_turn(state: dict, note: str) -> str:
     state["pending"] = None
 
     if is_checkmate(state, other):
-        state["status"] = "checkmate"
-        state["winner"] = GOTE if other == SENTE else SENTE
-        state["games"] = state.get("games", 0) + 1
+        record_win(state, GOTE if other == SENTE else SENTE, "詰み")
         return f"{note} 詰みです。{SIDE_NAME[state['winner']]}の勝ち。"
     if in_check(state["board"], other):
         return f"{note} 王手。"
@@ -502,15 +525,26 @@ def play(state: dict, command: str, user: str) -> str:
             return "まだ対局中です。指し手をどうぞ。"
         keep_players = state.get("players", [])
         keep_games = state.get("games", 0)
+        keep_record = state.get("record", {SENTE: 0, GOTE: 0})
         fresh = blank_state()
         fresh["players"] = keep_players
         fresh["games"] = keep_games
+        fresh["record"] = keep_record
         state.clear()
         state.update(fresh)
         return "新しい盤面です。先手からどうぞ。"
 
     if state["status"] != "playing":
         return "この対局はもう終わっています。新しい対局を始めてください。"
+
+    if verb == "resign":
+        loser = state["turn"]
+        winner = GOTE if loser == SENTE else SENTE
+        state["last"] = f"{MARK[loser]}投了"
+        record_win(state, winner, "投了")
+        state["selected"] = None
+        state["pending"] = None
+        return f"{SIDE_NAME[loser]}の投了です。{SIDE_NAME[winner]}の勝ち。"
 
     if verb == "cancel":
         state["selected"] = None
@@ -596,7 +630,7 @@ def play(state: dict, command: str, user: str) -> str:
 def parse(title: str) -> str | None:
     match = re.search(
         r"shogi\s*\|\s*("
-        r"new|cancel"
+        r"new|cancel|resign"
         r"|sel\s+(?:\*[PLNSGBR]|[1-9][a-i])"
         r"|mv\s+(?:\*[PLNSGBR][1-9][a-i]|[1-9][a-i][1-9][a-i])"
         r"|pro\s+(?:yes|no)"
