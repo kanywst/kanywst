@@ -30,9 +30,9 @@
 
 <p align="center">先手の持ち駒: なし</p>
 
-<p align="center">駒をクリックして、次に行き先をクリック。30 秒ほどで盤が変わります。</p>
+<p align="center">駒をクリックして、次に行き先をクリック。30 秒ほどで盤が変わります。　<a href="https://github.com/kanywst/kanywst/issues/new?title=shogi%7Cresign&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds.">投了する</a></p>
 
-<p align="center">対局 0　指した人 0</p>
+<p align="center">通算 先手 0勝　後手 0勝　0局　指した人 0</p>
 <!-- SHOGI:END -->
 
 <h2 align="center">Guestbook</h2>

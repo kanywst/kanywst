@@ -109,7 +109,12 @@
  "pending": null,
  "status": "playing",
  "winner": null,
+ "reason": null,
  "last": null,
  "games": 0,
+ "record": {
+  "s": 0,
+  "g": 0
+ },
  "players": []
 }
