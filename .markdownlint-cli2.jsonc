@@ -8,14 +8,21 @@
     "MD036": false,
     "MD041": false,
     "MD060": false,
-    // The guest book table between the GUESTBOOK:START/END markers is written
-    // by .github/workflows/guestbook.yml via scripts/update_guestbook.py, which
-    // emits raw HTML. Everything outside those markers is plain markdown.
+    // Three kinds of raw HTML live in README.md, and nothing else does:
+    //   - picture/source/img for the theme-aware wordmark, and p to centre it
+    //   - table/tr/td for the three-column layout the profile READMEs that
+    //     actually work (simonw, tw93) all converge on, since markdown has no
+    //     column primitive
+    //   - the guest book table between the GUESTBOOK:START/END markers, written
+    //     by .github/workflows/guestbook.yml via scripts/update_guestbook.py
+    // Everything the build script writes between its own markers is plain
+    // markdown, so the generated sections stay lintable too.
     "MD033": {
       "allowed_elements": [
         "picture",
         "source",
         "img",
+        "p",
         "table",
         "thead",
         "tbody",
@@ -23,6 +30,7 @@
         "th",
         "td",
         "code",
+        "em",
         "a"
       ]
     }
