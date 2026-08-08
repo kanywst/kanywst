@@ -6,8 +6,6 @@ GitHub Actions から定期的に呼び出され、README.md のマーカー間�
 手で書き換える部分は散文だけで、数字とリストは常にライブのまま保たれる。
 
 埋めるマーカー:
-  STATS    - upstream にマージ済みの PR 件数 (散文の中にインライン展開)
-  ORGS     - マージ実績のある upstream リポジトリ名 (同上)
   UPSTREAM - 直近のマージ済み upstream PR
   RELEASES - 自作リポジトリの直近リリース
   WRITING  - dev.to の直近記事
@@ -37,7 +35,6 @@ MERGED_QUERY = f"is:pr author:{USER} is:merged {EXCLUDE}"
 MAX_UPSTREAM = 6
 MAX_RELEASES = 6
 MAX_WRITING = 6
-MAX_ORGS = 8
 MAX_TITLE = 58
 
 API = "https://api.github.com"
@@ -98,34 +95,6 @@ def build_upstream(merged: list[dict]) -> str:
             f"[**{repo}**]({item['html_url']}) {truncate(item['title'])} `{date}`"
         )
     return "\n\n".join(lines)
-
-
-def build_orgs(merged: list[dict]) -> str:
-    """散文に流し込む upstream リポジトリ名を選ぶ。
-
-    並びは「マージ件数の多い順、同数なら star の多い順」。件数だけで並べると
-    1件どうしの尾側が単なるアルファベット順になり、istio や opa より無名の
-    リポジトリが前に出てしまうため。owner/name で出すのは、name だけだと
-    smallstep/certificates が "certificates" になって意味を失うから。
-    """
-    counts: dict[str, int] = {}
-    for item in merged:
-        repo = repo_of(item)
-        counts[repo] = counts.get(repo, 0) + 1
-
-    stars: dict[str, int] = {}
-    for repo in counts:
-        try:
-            stars[repo] = request_json(f"{API}/repos/{repo}")["stargazers_count"]
-        except (urllib.error.URLError, KeyError):
-            stars[repo] = 0
-
-    ranked = sorted(counts, key=lambda repo: (-counts[repo], -stars[repo], repo))
-    ranked = ranked[:MAX_ORGS]
-
-    if len(ranked) < 2:
-        return ", ".join(ranked)
-    return ", ".join(ranked[:-1]) + f", and {ranked[-1]}"
 
 
 def build_releases() -> str:
@@ -195,12 +164,7 @@ def replace_block(content: str, name: str, body: str) -> str:
     if not pattern.search(content):
         raise SystemExit(f"marker {name} not found in {README_PATH}")
 
-    # 散文にインラインで差し込むものは前後に改行を入れない
-    if name in ("STATS", "ORGS"):
-        replacement = f"{start}{body}{end}"
-    else:
-        replacement = f"{start}\n{body}\n{end}"
-
+    replacement = f"{start}\n{body}\n{end}"
     return pattern.sub(lambda _: replacement, content)
 
 
@@ -208,14 +172,9 @@ def main() -> None:
     with open(README_PATH, encoding="utf-8") as f:
         content = f.read()
 
-    merged = search_prs(MERGED_QUERY)
-    total = merged["total_count"]
-    items = merged["items"]
+    items = search_prs(MERGED_QUERY)["items"]
 
-    plural = "pull request" if total == 1 else "pull requests"
     sections = {
-        "STATS": f"{total} {plural} merged",
-        "ORGS": build_orgs(items),
         "UPSTREAM": build_upstream(items),
         "RELEASES": build_releases,
         "WRITING": build_writing,

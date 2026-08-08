@@ -2,21 +2,21 @@
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/kt-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/kt-light.svg">
-    <img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/kt-light.svg" width="180" height="107" alt="kt">
+    <img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/kt-light.svg" width="128" height="76" alt="kt">
   </picture>
 </p>
 
 I work on identity, authorization, and cloud native security, mostly in Go and increasingly in Rust.
 
-Most of my open source time goes into other people's code: <!-- STATS:START -->28 pull requests merged<!-- STATS:END --> upstream so far, in <!-- ORGS:START -->dexidp/dex, spiffe/spire, lldap/lldap, openfga/openfga, google-gemini/gemini-cli, istio/istio, golangci/golangci-lint, and open-policy-agent/opa<!-- ORGS:END -->. What I go looking for is authentication, authorization, and cryptography bugs, because those are the parts that are load bearing and quietly wrong.
+Most of my open source time goes into other people's code, usually authentication, authorization, or cryptography bugs. The rest goes into small tools around the same specs: an OpenID AuthZEN PDP, a SPIFFE workload identity plane, a couple of compliance checkers.
 
-The rest goes into the gap those bugs come out of. A specification says MUST and nothing checks whether anything does, so I write both halves: the thing that implements it properly and the thing that proves it. An OpenID AuthZEN PDP, a SPIFFE workload identity plane, compliance checkers that cite the clause they fail on.
+<!-- yes, the three columns are generated. no, i am not going to pretend i keep them up to date by hand -->
 
 <table>
 <tr>
 <td valign="top" width="34%">
 
-### Merged upstream
+### Recent upstream
 
 <!-- UPSTREAM:START -->
 [**theupdateframework/go-tuf**](https://github.com/theupdateframework/go-tuf/pull/739) fix(metadata): reject ed25519 public keys with invalid… `2026-08-07`
@@ -32,12 +32,12 @@ The rest goes into the gap those bugs come out of. A specification says MUST and
 [**glauth/glauth**](https://github.com/glauth/glauth/pull/470) fix: reject disabled users on all backends in Bind `2026-07-18`
 <!-- UPSTREAM:END -->
 
-[Everything merged](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Amerged+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [open](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Aopen+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [issues I've filed](https://github.com/search?q=is%3Aissue+author%3Akanywst+-user%3Akanywst+-org%3A0-draft&type=issues)
+[merged](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Amerged+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [open](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Aopen+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [issues](https://github.com/search?q=is%3Aissue+author%3Akanywst+-user%3Akanywst+-org%3A0-draft&type=issues)
 
 </td>
 <td valign="top" width="33%">
 
-### Latest releases
+### Recent releases
 
 <!-- RELEASES:START -->
 [**opa-authzen-plugin** v0.5.1](https://github.com/kanywst/opa-authzen-plugin/releases/tag/v0.5.1) `2026-08-03`
@@ -79,8 +79,6 @@ More at [kanywst.github.io](https://kanywst.github.io/)
 </td>
 </tr>
 </table>
-
-Those three columns rewrite themselves from the GitHub and dev.to APIs, so nothing on this page is a number I typed by hand. [How it works](https://github.com/kanywst/kanywst/blob/main/.github/workflows/readme.yml).
 
 ## Guestbook
 
