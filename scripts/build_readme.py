@@ -1,0 +1,241 @@
+#!/usr/bin/env python3
+"""
+build_readme.py
+
+GitHub Actions から定期的に呼び出され、README.md のマーカー間を生データで埋める。
+手で書き換える部分は散文だけで、数字とリストは常にライブのまま保たれる。
+
+埋めるマーカー:
+  STATS    - upstream にマージ済みの PR 件数 (散文の中にインライン展開)
+  ORGS     - マージ実績のある upstream リポジトリ名 (同上)
+  UPSTREAM - 直近のマージ済み upstream PR
+  RELEASES - 自作リポジトリの直近リリース
+  WRITING  - dev.to の直近記事
+
+環境変数:
+  GITHUB_TOKEN - Search API と GraphQL の認証に使う (必須)
+
+いずれかの取得に失敗したセクションは既存の内容をそのまま残す。
+一時的な API 障害で README が空になるより、古いままの方がましなため。
+"""
+
+import json
+import os
+import re
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+
+README_PATH = "README.md"
+USER = "kanywst"
+
+# 自分のリポジトリと下書き用 org は upstream 貢献から除く
+EXCLUDE = f"-user:{USER} -org:0-draft"
+MERGED_QUERY = f"is:pr author:{USER} is:merged {EXCLUDE}"
+
+MAX_UPSTREAM = 6
+MAX_RELEASES = 6
+MAX_WRITING = 6
+MAX_ORGS = 8
+MAX_TITLE = 58
+
+API = "https://api.github.com"
+
+
+def request_json(url: str, data: dict | None = None) -> dict:
+    """GitHub API / dev.to API を叩いて JSON を返す。"""
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": f"{USER}-build-readme",
+    }
+    token = os.environ.get("GITHUB_TOKEN")
+    if token and url.startswith(API):
+        headers["Authorization"] = f"Bearer {token}"
+
+    body = json.dumps(data).encode() if data is not None else None
+    if body is not None:
+        headers["Content-Type"] = "application/json"
+
+    req = urllib.request.Request(url, data=body, headers=headers)
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return json.loads(resp.read().decode())
+
+
+def truncate(text: str, limit: int = MAX_TITLE) -> str:
+    """カラム幅に収まるようタイトルを詰める。語の途中では切らない。"""
+    text = " ".join(text.split())
+    if len(text) <= limit:
+        return text
+    cut = text[: limit - 1]
+    # 直前の空白まで戻す。1語で溢れる場合のみ語中で切る。
+    if " " in cut:
+        cut = cut[: cut.rindex(" ")]
+    return cut.rstrip(" ,.:;-") + "…"
+
+
+def search_prs(query: str, per_page: int = 100) -> dict:
+    url = (
+        f"{API}/search/issues?q={urllib.parse.quote(query)}"
+        f"&sort=updated&order=desc&per_page={per_page}"
+    )
+    return request_json(url)
+
+
+def repo_of(item: dict) -> str:
+    """検索結果の repository_url から owner/name を取り出す。"""
+    return item["repository_url"].split("/repos/", 1)[1]
+
+
+def build_upstream(merged: list[dict]) -> str:
+    # 検索は updated 順で返るので、表示に使う closed_at で並べ直す。
+    merged = sorted(merged, key=lambda item: item["closed_at"], reverse=True)
+    lines = []
+    for item in merged[:MAX_UPSTREAM]:
+        repo = repo_of(item)
+        date = item["closed_at"][:10]
+        lines.append(
+            f"[**{repo}**]({item['html_url']}) {truncate(item['title'])} `{date}`"
+        )
+    return "\n\n".join(lines)
+
+
+def build_orgs(merged: list[dict]) -> str:
+    """散文に流し込む upstream リポジトリ名を選ぶ。
+
+    並びは「マージ件数の多い順、同数なら star の多い順」。件数だけで並べると
+    1件どうしの尾側が単なるアルファベット順になり、istio や opa より無名の
+    リポジトリが前に出てしまうため。owner/name で出すのは、name だけだと
+    smallstep/certificates が "certificates" になって意味を失うから。
+    """
+    counts: dict[str, int] = {}
+    for item in merged:
+        repo = repo_of(item)
+        counts[repo] = counts.get(repo, 0) + 1
+
+    stars: dict[str, int] = {}
+    for repo in counts:
+        try:
+            stars[repo] = request_json(f"{API}/repos/{repo}")["stargazers_count"]
+        except (urllib.error.URLError, KeyError):
+            stars[repo] = 0
+
+    ranked = sorted(counts, key=lambda repo: (-counts[repo], -stars[repo], repo))
+    ranked = ranked[:MAX_ORGS]
+
+    if len(ranked) < 2:
+        return ", ".join(ranked)
+    return ", ".join(ranked[:-1]) + f", and {ranked[-1]}"
+
+
+def build_releases() -> str:
+    query = """
+    query {
+      user(login: "%s") {
+        repositories(
+          first: 100
+          ownerAffiliations: OWNER
+          isFork: false
+          privacy: PUBLIC
+          orderBy: {field: PUSHED_AT, direction: DESC}
+        ) {
+          nodes {
+            name
+            isArchived
+            releases(first: 1, orderBy: {field: CREATED_AT, direction: DESC}) {
+              nodes { tagName publishedAt url isPrerelease }
+            }
+          }
+        }
+      }
+    }
+    """ % USER
+
+    payload = request_json(f"{API}/graphql", {"query": query})
+    nodes = payload["data"]["user"]["repositories"]["nodes"]
+
+    releases = []
+    for repo in nodes:
+        if repo["isArchived"] or not repo["releases"]["nodes"]:
+            continue
+        rel = repo["releases"]["nodes"][0]
+        if rel["isPrerelease"] or not rel["publishedAt"]:
+            continue
+        # goreleaser が付ける "name-1.2.3" 形式を v1.2.3 に寄せる
+        tag = rel["tagName"]
+        if tag.startswith(f"{repo['name']}-"):
+            tag = "v" + tag[len(repo["name"]) + 1 :]
+        releases.append((rel["publishedAt"], repo["name"], tag, rel["url"]))
+
+    releases.sort(reverse=True)
+
+    lines = []
+    for published, name, tag, url in releases[:MAX_RELEASES]:
+        lines.append(f"[**{name}** {tag}]({url}) `{published[:10]}`")
+    return "\n\n".join(lines)
+
+
+def build_writing() -> str:
+    articles = request_json(
+        f"https://dev.to/api/articles?username={USER}&per_page={MAX_WRITING}"
+    )
+    lines = []
+    for article in articles[:MAX_WRITING]:
+        date = article["published_at"][:10]
+        lines.append(f"[{truncate(article['title'])}]({article['url']}) `{date}`")
+    return "\n\n".join(lines)
+
+
+def replace_block(content: str, name: str, body: str) -> str:
+    """<!-- NAME:START --> と <!-- NAME:END --> の間を差し替える。"""
+    start = f"<!-- {name}:START -->"
+    end = f"<!-- {name}:END -->"
+    pattern = re.compile(rf"{re.escape(start)}.*?{re.escape(end)}", re.DOTALL)
+
+    if not pattern.search(content):
+        raise SystemExit(f"marker {name} not found in {README_PATH}")
+
+    # 散文にインラインで差し込むものは前後に改行を入れない
+    if name in ("STATS", "ORGS"):
+        replacement = f"{start}{body}{end}"
+    else:
+        replacement = f"{start}\n{body}\n{end}"
+
+    return pattern.sub(lambda _: replacement, content)
+
+
+def main() -> None:
+    with open(README_PATH, encoding="utf-8") as f:
+        content = f.read()
+
+    merged = search_prs(MERGED_QUERY)
+    total = merged["total_count"]
+    items = merged["items"]
+
+    plural = "pull request" if total == 1 else "pull requests"
+    sections = {
+        "STATS": f"{total} {plural} merged",
+        "ORGS": build_orgs(items),
+        "UPSTREAM": build_upstream(items),
+        "RELEASES": build_releases,
+        "WRITING": build_writing,
+    }
+
+    for name, value in sections.items():
+        try:
+            body = value() if callable(value) else value
+        except (urllib.error.URLError, KeyError, TypeError) as err:
+            print(f"skipped {name}: {err}", file=sys.stderr)
+            continue
+        if not body:
+            print(f"skipped {name}: empty", file=sys.stderr)
+            continue
+        content = replace_block(content, name, body)
+        print(f"updated {name}")
+
+    with open(README_PATH, "w", encoding="utf-8") as f:
+        f.write(content)
+
+
+if __name__ == "__main__":
+    main()
