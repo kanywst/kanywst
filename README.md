@@ -1,4 +1,8 @@
-# Hi, I'm kt
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset=".github/kt-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset=".github/kt-light.svg">
+  <img src=".github/kt-light.svg" width="128" height="76" alt="kt">
+</picture>
 
 I work on identity, authorization, and cloud native security, mostly in Go and increasingly in Rust. Most of my open source time goes into finding and fixing authentication, authorization, and cryptography bugs in other people's projects.
 
