@@ -32,10 +32,12 @@ USER = "kanywst"
 EXCLUDE = f"-user:{USER} -org:0-draft"
 MERGED_QUERY = f"is:pr author:{USER} is:merged {EXCLUDE}"
 
-MAX_UPSTREAM = 6
-MAX_RELEASES = 6
-MAX_WRITING = 6
-MAX_TITLE = 58
+# プロフィールページの README カラムは実測 846px、狭い画面では 590px しかない。
+# 3 カラムに割ると 1 本 270px / 190px なので、1 行に収まらないものは全部落とす。
+MAX_UPSTREAM = 5
+MAX_RELEASES = 5
+MAX_WRITING = 4
+MAX_TITLE = 42
 
 API = "https://api.github.com"
 
@@ -87,13 +89,19 @@ def repo_of(item: dict) -> str:
 def build_upstream(merged: list[dict]) -> str:
     # 検索は updated 順で返るので、表示に使う closed_at で並べ直す。
     merged = sorted(merged, key=lambda item: item["closed_at"], reverse=True)
+    # PR タイトルと日付は載せない。狭いカラムだと 1 件が 4 行に折り返して、
+    # 5 件で壁になる。どこに入ったかが読めれば足りる。
+    # タイトルを外すと同じリポジトリの複数 PR が同じ行になるので、最新だけ残す。
     lines = []
-    for item in merged[:MAX_UPSTREAM]:
+    seen: set[str] = set()
+    for item in merged:
         repo = repo_of(item)
-        date = item["closed_at"][:10]
-        lines.append(
-            f"[**{repo}**]({item['html_url']}) {truncate(item['title'])} `{date}`"
-        )
+        if repo in seen:
+            continue
+        seen.add(repo)
+        lines.append(f"[{repo}]({item['html_url']})")
+        if len(lines) == MAX_UPSTREAM:
+            break
     return "\n\n".join(lines)
 
 
@@ -139,8 +147,8 @@ def build_releases() -> str:
     releases.sort(reverse=True)
 
     lines = []
-    for published, name, tag, url in releases[:MAX_RELEASES]:
-        lines.append(f"[**{name}** {tag}]({url}) `{published[:10]}`")
+    for _published, name, tag, url in releases[:MAX_RELEASES]:
+        lines.append(f"[{name}]({url}) {tag}")
     return "\n\n".join(lines)
 
 
@@ -150,8 +158,7 @@ def build_writing() -> str:
     )
     lines = []
     for article in articles[:MAX_WRITING]:
-        date = article["published_at"][:10]
-        lines.append(f"[{truncate(article['title'])}]({article['url']}) `{date}`")
+        lines.append(f"[{truncate(article['title'])}]({article['url']})")
     return "\n\n".join(lines)
 
 

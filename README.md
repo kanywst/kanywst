@@ -19,17 +19,15 @@ Most of my open source time goes into other people's code, usually authenticatio
 ### Recent upstream
 
 <!-- UPSTREAM:START -->
-[**theupdateframework/go-tuf**](https://github.com/theupdateframework/go-tuf/pull/739) fix(metadata): reject ed25519 public keys with invalid… `2026-08-07`
+[theupdateframework/go-tuf](https://github.com/theupdateframework/go-tuf/pull/739)
 
-[**spiffe/spiffe**](https://github.com/spiffe/spiffe/pull/417) Add wit-svid to the list of supported use values `2026-08-03`
+[spiffe/spiffe](https://github.com/spiffe/spiffe/pull/417)
 
-[**php-casbin/php-casbin**](https://github.com/php-casbin/php-casbin/pull/174) fix: evaluate domain link conditions on transitive role… `2026-07-19`
+[php-casbin/php-casbin](https://github.com/php-casbin/php-casbin/pull/174)
 
-[**lldap/lldap**](https://github.com/lldap/lldap/pull/1469) server: use OsRng for refresh and password-reset tokens `2026-07-19`
+[lldap/lldap](https://github.com/lldap/lldap/pull/1469)
 
-[**lldap/lldap**](https://github.com/lldap/lldap/pull/1468) Fix: panic in password modify when a regular user… `2026-07-19`
-
-[**glauth/glauth**](https://github.com/glauth/glauth/pull/470) fix: reject disabled users on all backends in Bind `2026-07-18`
+[glauth/glauth](https://github.com/glauth/glauth/pull/470)
 <!-- UPSTREAM:END -->
 
 [merged](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Amerged+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [open](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Aopen+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [issues](https://github.com/search?q=is%3Aissue+author%3Akanywst+-user%3Akanywst+-org%3A0-draft&type=issues)
@@ -40,17 +38,15 @@ Most of my open source time goes into other people's code, usually authenticatio
 ### Recent releases
 
 <!-- RELEASES:START -->
-[**opa-authzen-plugin** v0.5.1](https://github.com/kanywst/opa-authzen-plugin/releases/tag/v0.5.1) `2026-08-03`
+[opa-authzen-plugin](https://github.com/kanywst/opa-authzen-plugin/releases/tag/v0.5.1) v0.5.1
 
-[**brtc** v1.3.1](https://github.com/kanywst/brtc/releases/tag/v1.3.1) `2026-08-03`
+[brtc](https://github.com/kanywst/brtc/releases/tag/v1.3.1) v1.3.1
 
-[**a2acode** v0.6.2](https://github.com/kanywst/a2acode/releases/tag/v0.6.2) `2026-08-02`
+[a2acode](https://github.com/kanywst/a2acode/releases/tag/v0.6.2) v0.6.2
 
-[**omega** v0.3.0](https://github.com/kanywst/omega/releases/tag/omega-0.3.0) `2026-08-02`
+[omega](https://github.com/kanywst/omega/releases/tag/omega-0.3.0) v0.3.0
 
-[**spiffe-compliance-checker** v0.2.0](https://github.com/kanywst/spiffe-compliance-checker/releases/tag/v0.2.0) `2026-07-31`
-
-[**wtfi2** v0.2.0](https://github.com/kanywst/wtfi2/releases/tag/v0.2.0) `2026-07-23`
+[spiffe-compliance-checker](https://github.com/kanywst/spiffe-compliance-checker/releases/tag/v0.2.0) v0.2.0
 <!-- RELEASES:END -->
 
 What I am actively working on is pinned below.
@@ -61,17 +57,13 @@ What I am actively working on is pinned below.
 ### Writing
 
 <!-- WRITING:START -->
-[Mapping MCP, A2A, and ACP: Telling AI Agent Protocols…](https://dev.to/kanywst/mapping-mcp-a2a-and-acp-telling-ai-agent-protocols-apart-in-2026-1hha) `2026-06-28`
+[Mapping MCP, A2A, and ACP: Telling AI…](https://dev.to/kanywst/mapping-mcp-a2a-and-acp-telling-ai-agent-protocols-apart-in-2026-1hha)
 
-[The Day client_id Becomes a URL: Client ID Metadata…](https://dev.to/kanywst/the-day-clientid-becomes-a-url-client-id-metadata-documents-vs-dynamic-client-registration-dcr-dhi) `2026-06-26`
+[The Day client_id Becomes a URL: Client…](https://dev.to/kanywst/the-day-clientid-becomes-a-url-client-id-metadata-documents-vs-dynamic-client-registration-dcr-dhi)
 
-[AgentAuth Deep Dive: Reading the Self-Authenticating…](https://dev.to/kanywst/agentauth-deep-dive-reading-the-self-authenticating-uuid-for-ai-agents-from-the-source-44eh) `2026-06-25`
+[AgentAuth Deep Dive: Reading the…](https://dev.to/kanywst/agentauth-deep-dive-reading-the-self-authenticating-uuid-for-ai-agents-from-the-source-44eh)
 
-[JWT (Access Token) vs X.509 Deep Dive: How to Choose…](https://dev.to/kanywst/jwt-access-token-vs-x509-deep-dive-how-to-choose-what-you-present-as-a-credential-34ij) `2026-06-15`
-
-[a2claude: Turn Claude Code Into a Server Other AI Agents…](https://dev.to/kanywst/a2claude-turn-claude-code-into-a-server-other-ai-agents-can-call-1mf6) `2026-06-14`
-
-[A2A Protocol Auth, Taken Apart: Why the Spec Is Thin and…](https://dev.to/kanywst/a2a-protocol-auth-taken-apart-why-the-spec-is-thin-and-where-that-leaves-holes-22ii) `2026-06-13`
+[JWT (Access Token) vs X.509 Deep Dive…](https://dev.to/kanywst/jwt-access-token-vs-x509-deep-dive-how-to-choose-what-you-present-as-a-credential-34ij)
 <!-- WRITING:END -->
 
 More at [kanywst.github.io](https://kanywst.github.io/)
