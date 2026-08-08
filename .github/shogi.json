@@ -111,6 +111,7 @@
  "winner": null,
  "reason": null,
  "last": null,
+ "moves": [],
  "games": 0,
  "record": {
   "s": 0,
