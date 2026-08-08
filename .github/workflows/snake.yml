@@ -1,0 +1,40 @@
+name: Snake
+
+on:
+  schedule:
+    - cron: "41 4 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/snake.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+
+    steps:
+      # svg-only is the faster variant of Platane/snk; the gif encoder is the
+      # slow part and nothing here needs a gif.
+      #
+      # The dot ramps are the kanywst.github.io teal, so the snake matches the
+      # cursor in the wordmark rather than arriving in GitHub green. color_dots
+      # takes exactly five: no contributions, then low to high.
+      - uses: Platane/snk/svg-only@v3
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          outputs: |
+            dist/snake-light.svg?color_snake=#0d9488&color_dots=#ebedf0,#99f6e4,#5eead4,#2dd4bf,#0d9488
+            dist/snake-dark.svg?color_snake=#5eead4&color_dots=#161b22,#0f766e,#0d9488,#2dd4bf,#5eead4
+
+      # Generated art is committed to a detached output branch rather than main,
+      # which is how Platane's own profile does it: main stays hand-written.
+      - uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

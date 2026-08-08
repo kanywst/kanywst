@@ -10,8 +10,6 @@ I work on identity, authorization, and cloud native security, mostly in Go and i
 
 Most of my open source time goes into other people's code, usually authentication, authorization, or cryptography bugs. The rest goes into small tools around the same specs: an OpenID AuthZEN PDP, a SPIFFE workload identity plane, a couple of compliance checkers.
 
-<!-- yes, the three columns are generated. no, i am not going to pretend i keep them up to date by hand -->
-
 <table>
 <tr>
 <td valign="top" width="34%">
@@ -71,6 +69,12 @@ More at [kanywst.github.io](https://kanywst.github.io/)
 </td>
 </tr>
 </table>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kanywst/kanywst/output/snake-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kanywst/kanywst/output/snake-light.svg">
+  <img src="https://raw.githubusercontent.com/kanywst/kanywst/output/snake-light.svg" alt="A snake eating my contribution graph">
+</picture>
 
 ## Guestbook
 
