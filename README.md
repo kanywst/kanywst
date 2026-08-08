@@ -6,75 +6,26 @@
   </picture>
 </p>
 
-I work on identity, authorization, and cloud native security, mostly in Go and increasingly in Rust.
+I work on identity, authorization, and cloud native security, mostly in Go and increasingly in Rust. Projects and writing are at [kanywst.github.io](https://kanywst.github.io/).
 
-Most of my open source time goes into other people's code, usually authentication, authorization, or cryptography bugs. The rest goes into small tools around the same specs: an OpenID AuthZEN PDP, a SPIFFE workload identity plane, a couple of compliance checkers.
+## Connect Four
 
-<table>
-<tr>
-<td valign="top" width="34%">
+<!-- CONNECT4:START -->
+🔴 Red to play. Anyone can take the turn.
 
-### Recent upstream
+| [1](https://github.com/kanywst/kanywst/issues/new?title=connect4%7C1&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds.) | [2](https://github.com/kanywst/kanywst/issues/new?title=connect4%7C2&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds.) | [3](https://github.com/kanywst/kanywst/issues/new?title=connect4%7C3&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds.) | [4](https://github.com/kanywst/kanywst/issues/new?title=connect4%7C4&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds.) | [5](https://github.com/kanywst/kanywst/issues/new?title=connect4%7C5&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds.) | [6](https://github.com/kanywst/kanywst/issues/new?title=connect4%7C6&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds.) | [7](https://github.com/kanywst/kanywst/issues/new?title=connect4%7C7&body=Just+click+Submit+new+issue.+The+board+updates+in+about+30+seconds.) |
+| :-: | :-: | :-: | :-: | :-: | :-: | :-: |
+| ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) |
+| ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) |
+| ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) |
+| ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) |
+| ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) |
+| ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) | ![ ](https://raw.githubusercontent.com/kanywst/kanywst/main/.github/c4-empty.svg) |
 
-<!-- UPSTREAM:START -->
-[theupdateframework/go-tuf](https://github.com/theupdateframework/go-tuf/pull/739)
+Click a number to drop a disc. It lands in about 30 seconds.
 
-[spiffe/spiffe](https://github.com/spiffe/spiffe/pull/417)
-
-[php-casbin/php-casbin](https://github.com/php-casbin/php-casbin/pull/174)
-
-[lldap/lldap](https://github.com/lldap/lldap/pull/1469)
-
-[glauth/glauth](https://github.com/glauth/glauth/pull/470)
-<!-- UPSTREAM:END -->
-
-[merged](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Amerged+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [open](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Aopen+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [issues](https://github.com/search?q=is%3Aissue+author%3Akanywst+-user%3Akanywst+-org%3A0-draft&type=issues)
-
-</td>
-<td valign="top" width="33%">
-
-### Recent releases
-
-<!-- RELEASES:START -->
-[opa-authzen-plugin](https://github.com/kanywst/opa-authzen-plugin/releases/tag/v0.5.1) v0.5.1
-
-[brtc](https://github.com/kanywst/brtc/releases/tag/v1.3.1) v1.3.1
-
-[a2acode](https://github.com/kanywst/a2acode/releases/tag/v0.6.2) v0.6.2
-
-[omega](https://github.com/kanywst/omega/releases/tag/omega-0.3.0) v0.3.0
-
-[spiffe-compliance-checker](https://github.com/kanywst/spiffe-compliance-checker/releases/tag/v0.2.0) v0.2.0
-<!-- RELEASES:END -->
-
-What I am actively working on is pinned below.
-
-</td>
-<td valign="top" width="33%">
-
-### Writing
-
-<!-- WRITING:START -->
-[Mapping MCP, A2A, and ACP: Telling AI…](https://dev.to/kanywst/mapping-mcp-a2a-and-acp-telling-ai-agent-protocols-apart-in-2026-1hha)
-
-[The Day client_id Becomes a URL: Client…](https://dev.to/kanywst/the-day-clientid-becomes-a-url-client-id-metadata-documents-vs-dynamic-client-registration-dcr-dhi)
-
-[AgentAuth Deep Dive: Reading the…](https://dev.to/kanywst/agentauth-deep-dive-reading-the-self-authenticating-uuid-for-ai-agents-from-the-source-44eh)
-
-[JWT (Access Token) vs X.509 Deep Dive…](https://dev.to/kanywst/jwt-access-token-vs-x509-deep-dive-how-to-choose-what-you-present-as-a-credential-34ij)
-<!-- WRITING:END -->
-
-More at [kanywst.github.io](https://kanywst.github.io/)
-
-</td>
-</tr>
-</table>
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kanywst/kanywst/output/snake-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kanywst/kanywst/output/snake-light.svg">
-  <img src="https://raw.githubusercontent.com/kanywst/kanywst/output/snake-light.svg" alt="A snake eating my contribution graph">
-</picture>
+0 games finished, 0 people have played.
+<!-- CONNECT4:END -->
 
 ## Guestbook
 
