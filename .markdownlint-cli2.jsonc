@@ -1,0 +1,30 @@
+{
+  // Self-contained on purpose: this is a public repo, so it must not point at
+  // an absolute path in anyone's home directory.
+  "config": {
+    "default": true,
+    "MD013": false,
+    "MD024": false,
+    "MD036": false,
+    "MD041": false,
+    "MD060": false,
+    // The guest book table between the GUESTBOOK:START/END markers is written
+    // by .github/workflows/guestbook.yml via scripts/update_guestbook.py, which
+    // emits raw HTML. Everything outside those markers is plain markdown.
+    "MD033": {
+      "allowed_elements": [
+        "picture",
+        "source",
+        "img",
+        "table",
+        "thead",
+        "tbody",
+        "tr",
+        "th",
+        "td",
+        "code",
+        "a"
+      ]
+    }
+  }
+}
