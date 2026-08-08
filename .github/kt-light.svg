@@ -6,5 +6,10 @@
     <path d="M72 16 V54 c0 6 4 10 12 10"/>
     <path d="M58 30 H88"/>
   </g>
-  <rect x="100" y="56" width="28" height="8" fill="#0d9488"/>
+  <rect x="100" y="56" width="28" height="8" fill="#0d9488">
+    <!-- A terminal cursor blinks, so this one does too. Stepped rather than
+         faded, and 1.06s, which is what a VT100 actually did. -->
+    <animate attributeName="opacity" values="1;1;0;0" keyTimes="0;0.5;0.5;1"
+             dur="1.06s" calcMode="discrete" repeatCount="indefinite"/>
+  </rect>
 </svg>
