@@ -1,15 +1,86 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/kt-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/kt-light.svg">
-  <img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/kt-light.svg" width="128" height="76" alt="kt">
-</picture>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/kt-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/kt-light.svg">
+    <img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/kt-light.svg" width="180" height="107" alt="kt">
+  </picture>
+</p>
 
-I work on identity, authorization, and cloud native security, mostly in Go and increasingly in Rust. Most of my open source time goes into finding and fixing authentication, authorization, and cryptography bugs in other people's projects.
+I work on identity, authorization, and cloud native security, mostly in Go and increasingly in Rust.
 
-- Upstream: [merged](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Amerged+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [open](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Aopen+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [issues I've filed](https://github.com/search?q=is%3Aissue+author%3Akanywst+-user%3Akanywst+-org%3A0-draft&type=issues)
-- Projects and writing: [kanywst.github.io](https://kanywst.github.io/)
+Most of my open source time goes into other people's code: <!-- STATS:START -->28 pull requests merged<!-- STATS:END --> upstream so far, in <!-- ORGS:START -->dexidp/dex, spiffe/spire, lldap/lldap, openfga/openfga, google-gemini/gemini-cli, istio/istio, golangci/golangci-lint, and open-policy-agent/opa<!-- ORGS:END -->. What I go looking for is authentication, authorization, and cryptography bugs, because those are the parts that are load bearing and quietly wrong.
 
-Projects I'm actively working on are pinned below.
+The rest goes into the gap those bugs come out of. A specification says MUST and nothing checks whether anything does, so I write both halves: the thing that implements it properly and the thing that proves it. An OpenID AuthZEN PDP, a SPIFFE workload identity plane, compliance checkers that cite the clause they fail on.
+
+<table>
+<tr>
+<td valign="top" width="34%">
+
+### Merged upstream
+
+<!-- UPSTREAM:START -->
+[**theupdateframework/go-tuf**](https://github.com/theupdateframework/go-tuf/pull/739) fix(metadata): reject ed25519 public keys with invalid… `2026-08-07`
+
+[**spiffe/spiffe**](https://github.com/spiffe/spiffe/pull/417) Add wit-svid to the list of supported use values `2026-08-03`
+
+[**php-casbin/php-casbin**](https://github.com/php-casbin/php-casbin/pull/174) fix: evaluate domain link conditions on transitive role… `2026-07-19`
+
+[**lldap/lldap**](https://github.com/lldap/lldap/pull/1469) server: use OsRng for refresh and password-reset tokens `2026-07-19`
+
+[**lldap/lldap**](https://github.com/lldap/lldap/pull/1468) Fix: panic in password modify when a regular user… `2026-07-19`
+
+[**glauth/glauth**](https://github.com/glauth/glauth/pull/470) fix: reject disabled users on all backends in Bind `2026-07-18`
+<!-- UPSTREAM:END -->
+
+[Everything merged](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Amerged+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [open](https://github.com/search?q=is%3Apr+author%3Akanywst+is%3Aopen+-user%3Akanywst+-org%3A0-draft&type=pullrequests) · [issues I've filed](https://github.com/search?q=is%3Aissue+author%3Akanywst+-user%3Akanywst+-org%3A0-draft&type=issues)
+
+</td>
+<td valign="top" width="33%">
+
+### Latest releases
+
+<!-- RELEASES:START -->
+[**opa-authzen-plugin** v0.5.1](https://github.com/kanywst/opa-authzen-plugin/releases/tag/v0.5.1) `2026-08-03`
+
+[**brtc** v1.3.1](https://github.com/kanywst/brtc/releases/tag/v1.3.1) `2026-08-03`
+
+[**a2acode** v0.6.2](https://github.com/kanywst/a2acode/releases/tag/v0.6.2) `2026-08-02`
+
+[**omega** v0.3.0](https://github.com/kanywst/omega/releases/tag/omega-0.3.0) `2026-08-02`
+
+[**spiffe-compliance-checker** v0.2.0](https://github.com/kanywst/spiffe-compliance-checker/releases/tag/v0.2.0) `2026-07-31`
+
+[**wtfi2** v0.2.0](https://github.com/kanywst/wtfi2/releases/tag/v0.2.0) `2026-07-23`
+<!-- RELEASES:END -->
+
+What I am actively working on is pinned below.
+
+</td>
+<td valign="top" width="33%">
+
+### Writing
+
+<!-- WRITING:START -->
+[Mapping MCP, A2A, and ACP: Telling AI Agent Protocols…](https://dev.to/kanywst/mapping-mcp-a2a-and-acp-telling-ai-agent-protocols-apart-in-2026-1hha) `2026-06-28`
+
+[The Day client_id Becomes a URL: Client ID Metadata…](https://dev.to/kanywst/the-day-clientid-becomes-a-url-client-id-metadata-documents-vs-dynamic-client-registration-dcr-dhi) `2026-06-26`
+
+[AgentAuth Deep Dive: Reading the Self-Authenticating…](https://dev.to/kanywst/agentauth-deep-dive-reading-the-self-authenticating-uuid-for-ai-agents-from-the-source-44eh) `2026-06-25`
+
+[JWT (Access Token) vs X.509 Deep Dive: How to Choose…](https://dev.to/kanywst/jwt-access-token-vs-x509-deep-dive-how-to-choose-what-you-present-as-a-credential-34ij) `2026-06-15`
+
+[a2claude: Turn Claude Code Into a Server Other AI Agents…](https://dev.to/kanywst/a2claude-turn-claude-code-into-a-server-other-ai-agents-can-call-1mf6) `2026-06-14`
+
+[A2A Protocol Auth, Taken Apart: Why the Spec Is Thin and…](https://dev.to/kanywst/a2a-protocol-auth-taken-apart-why-the-spec-is-thin-and-where-that-leaves-holes-22ii) `2026-06-13`
+<!-- WRITING:END -->
+
+More at [kanywst.github.io](https://kanywst.github.io/)
+
+</td>
+</tr>
+</table>
+
+Those three columns rewrite themselves from the GitHub and dev.to APIs, so nothing on this page is a number I typed by hand. [How it works](https://github.com/kanywst/kanywst/blob/main/.github/workflows/readme.yml).
 
 ## Guestbook
 
