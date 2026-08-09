@@ -23,8 +23,9 @@ jobs:
     # so runs skipped by the `if:` above never take up a slot.
     concurrency:
       group: readme-write
+      # queue: max cannot be combined with cancel-in-progress: true, and false
+      # is the default, so it is left unset rather than spelled out.
       queue: max
-      cancel-in-progress: false
 
     steps:
       # ref: main because an `issues` event pins GITHUB_SHA to the commit that
