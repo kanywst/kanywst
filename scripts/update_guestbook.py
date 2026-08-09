@@ -33,8 +33,11 @@ def parse_message(body: str) -> str:
         # フォールバック: 本文全体の最初の非空行
         lines = [l.strip() for l in body.splitlines() if l.strip() and not l.startswith("#")]
         msg = lines[0] if lines else "(no message)"
-    # テーブル内で問題になる文字をエスケープ
-    msg = msg.replace("|", "\\|").replace("\n", " ")
+    # テーブル内で問題になる文字をエスケープ。
+    # str.splitlines() は \r や   でも行を割るので、あとで既存行を読み直す
+    # ときに 1 行が途中で切れてテーブルが壊れる。改行になりうる文字を全部潰す。
+    msg = re.sub(r"[\r\n\v\f\x1c-\x1e\x85  ]+", " ", msg)
+    msg = msg.replace("|", "\\|")
     return msg[:200]  # 最大200文字
 
 
@@ -92,7 +95,9 @@ def update_readme(new_row: str) -> None:
     all_rows = all_rows[:MAX_ENTRIES]
 
     new_block = f"{START_MARKER}\n{build_table(all_rows)}\n{END_MARKER}"
-    updated = pattern.sub(new_block, content)
+    # lambda で包まないと、訪問者の書いた \1 や \g が置換テンプレートとして
+    # 解釈されて re.PatternError で落ちる。
+    updated = pattern.sub(lambda _: new_block, content)
 
     with open(README_PATH, "w", encoding="utf-8") as f:
         f.write(updated)

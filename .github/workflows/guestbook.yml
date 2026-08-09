@@ -5,44 +5,74 @@ on:
     types: [opened]
 
 permissions:
-  contents: write
-  issues: write
-
-concurrency:
-  # Shared with .github/workflows/readme.yml, which also commits to README.md.
-  group: readme-write
-  cancel-in-progress: false
+  contents: read
 
 jobs:
   add-message:
     if: startsWith(github.event.issue.title, '📮 [Guest Book]')
     runs-on: ubuntu-latest
 
+    permissions:
+      contents: write
+      issues: write
+
+    # Shared with shogi.yml, which also commits to README.md. queue: max so a
+    # waiting run is not cancelled by the next arrival. On the job so that runs
+    # skipped by the `if:` above never take up a slot.
+    concurrency:
+      group: readme-write
+      queue: max
+      cancel-in-progress: false
+
     steps:
-      - uses: actions/checkout@v7
+      # ref: main because an `issues` event pins GITHUB_SHA to the commit that
+      # was head when the issue was opened, so a queued run would otherwise
+      # check out a stale tree and its push would be rejected.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
 
       - name: Set up Python
-        uses: actions/setup-python@v7
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
 
-      - name: Update guest book
+      - name: Update guest book and push
         env:
           ISSUE_BODY: ${{ github.event.issue.body }}
           ISSUE_USER: ${{ github.event.issue.user.login }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
-        run: python scripts/update_guestbook.py
-
-      - name: Commit changes
         run: |
+          set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md
-          git diff --cached --quiet || git commit -m "📮 New guest book entry from @${{ github.event.issue.user.login }}"
-          git push
+
+          for attempt in 1 2 3 4 5; do
+            git fetch --quiet origin main
+            git reset --quiet --hard origin/main
+
+            # Re-run against the refreshed README: a shogi move may have landed
+            # while this entry waited its turn.
+            python scripts/update_guestbook.py
+
+            git add README.md
+            if git diff --cached --quiet; then
+              break
+            fi
+            git commit --quiet -m "📮 New guest book entry from @${ISSUE_USER}"
+
+            if git push --quiet; then
+              break
+            fi
+            if [ "$attempt" = 5 ]; then
+              echo "push kept losing the race" >&2
+              exit 1
+            fi
+            sleep $((attempt * 3))
+          done
 
       - name: Thank the visitor
-        uses: peter-evans/create-or-update-comment@v5
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
@@ -50,7 +80,18 @@ jobs:
             Your message has been added to [my profile](https://github.com/kanywst). ✨
 
       - name: Close issue
-        uses: peter-evans/close-issue@v3
+        uses: peter-evans/close-issue@05dff7ca07116e5707cfb3a3cd4af7bb5e43524c # v3.0.2
         with:
           issue-number: ${{ github.event.issue.number }}
           comment: "✅ Added to the guest book!"
+
+      # Without this the visitor is told nothing: the steps above carry an
+      # implicit success() gate, so a failed push closes no issue and posts no
+      # comment.
+      - name: Say so if it failed
+        if: failure()
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5.0.0
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            That did not go through — something went wrong on my side. Nothing was recorded, so signing again is safe.

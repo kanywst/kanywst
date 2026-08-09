@@ -25,6 +25,8 @@ INK = "#1f2328"
 PROMOTED_INK = "#b3261e"
 FACE = "#f0d9a8"
 EDGE = "#8b6f47"
+CELL = "#f7efdc"
+MARKER = "#c1121f"
 
 # CJK フォントは環境ごとに名前が違うので、実在しそうなものを順に並べて
 # 最後に総称 serif へ落とす。<img> で読み込まれた SVG は閲覧者側の
@@ -56,6 +58,7 @@ def svg(label: str, promoted: bool, gote: bool) -> str:
     # 後手の駒は盤ごと 180 度回して置くので、駒も回す
     rotate = f' transform="rotate(180 {W / 2} {H / 2})"' if gote else ""
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="{label}">
+  <rect x="0.75" y="0.75" width="{W - 1.5}" height="{H - 1.5}" fill="{CELL}" stroke="{EDGE}" stroke-width="1.5"/>
   <g{rotate}>
     <polygon points="{POINTS}" fill="{FACE}" stroke="{EDGE}" stroke-width="1.5" stroke-linejoin="round"/>
     <text x="{W / 2}" y="34" font-family="{FONT}" font-size="24" fill="{ink}" text-anchor="middle">{label}</text>
@@ -75,14 +78,20 @@ def main() -> None:
             path.write_text(svg(text, promoted, gote), encoding="utf-8")
             written += 1
 
-    # 空マス。盤の升目だけを描く。
-    (OUT / "empty.svg").write_text(
-        f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="empty">
-  <rect width="{W}" height="{H}" fill="none"/>
+    # 空マスと移動先。盤の枠は自分で描く。透明にしておくと、盤の格子が
+    # GitHub の画像プレースホルダの背景色に依存してしまう。
+    for name, extra in (
+        ("empty", ""),
+        ("target", f'<circle cx="{W / 2}" cy="{H / 2}" r="9" fill="none" stroke="{MARKER}" stroke-width="4"/>'),
+    ):
+        (OUT / f"{name}.svg").write_text(
+            f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="{name}">
+  <rect x="0.75" y="0.75" width="{W - 1.5}" height="{H - 1.5}" fill="{CELL}" stroke="{EDGE}" stroke-width="1.5"/>
+  {extra}
 </svg>
 """,
-        encoding="utf-8",
-    )
+            encoding="utf-8",
+        )
     print(f"wrote {written + 1} files to {OUT}")
 
 
