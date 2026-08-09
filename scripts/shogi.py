@@ -181,10 +181,46 @@ def load_state() -> dict:
             or any(not isinstance(r, list) or len(r) != N for r in board)):
         return fresh
 
-    # 欠けたキーは初期値のまま残す
-    for key, value in stored.items():
-        if key in fresh:
-            fresh[key] = value
+    # 盤の中身も見る。形だけ合っていて中身が壊れていると描画で落ちる。
+    known = set(KANJI) | {""}
+    for row in board:
+        for cell in row:
+            if not isinstance(cell, str):
+                return fresh
+            if cell and (cell[0] not in (SENTE, GOTE) or cell[1:] not in known):
+                return fresh
+
+    def hands_ok(value) -> bool:
+        return (isinstance(value, dict) and set(value) == {SENTE, GOTE}
+                and all(isinstance(h, dict)
+                        and all(k in KANJI and isinstance(n, int) and n >= 0
+                                for k, n in h.items())
+                        for h in value.values()))
+
+    # 型が合うものだけ受け入れる。合わないキーは初期値のまま残して先へ進む。
+    checks = {
+        "board": lambda v: True,
+        "hands": hands_ok,
+        "turn": lambda v: v in (SENTE, GOTE),
+        "selected": lambda v: v is None or (isinstance(v, str) and len(v) == 2),
+        "pending": lambda v: v is None or (isinstance(v, dict) and {"from", "to"} <= set(v)),
+        "status": lambda v: v in ("playing", "over"),
+        "winner": lambda v: v is None or v in (SENTE, GOTE),
+        "reason": lambda v: v is None or isinstance(v, str),
+        "last": lambda v: v is None or isinstance(v, str),
+        "moves": lambda v: isinstance(v, list) and all(isinstance(m, str) for m in v),
+        "games": lambda v: isinstance(v, int) and v >= 0,
+        "record": lambda v: (isinstance(v, dict)
+                             and all(isinstance(n, int) and n >= 0 for n in v.values())),
+        "players": lambda v: isinstance(v, list) and all(isinstance(u, str) for u in v),
+    }
+    for key, ok in checks.items():
+        if key in stored:
+            try:
+                if ok(stored[key]):
+                    fresh[key] = stored[key]
+            except (TypeError, AttributeError):
+                pass
     return fresh
 
 
