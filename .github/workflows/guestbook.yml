@@ -95,4 +95,4 @@ jobs:
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
-            That did not go through — something went wrong on my side. Nothing was recorded, so signing again is safe.
+            Something went wrong on my side, and I cannot tell whether that entry landed. Check the guest book below before signing again.

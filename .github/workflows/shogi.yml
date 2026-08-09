@@ -103,4 +103,4 @@ jobs:
         with:
           issue-number: ${{ github.event.issue.number }}
           body: |
-            That move did not land — something went wrong on my side. The board is unchanged, so clicking the same square again is safe.
+            Something went wrong on my side. Check the board before clicking again — the move may or may not have landed.

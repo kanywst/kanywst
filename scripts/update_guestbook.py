@@ -34,9 +34,11 @@ def parse_message(body: str) -> str:
         lines = [l.strip() for l in body.splitlines() if l.strip() and not l.startswith("#")]
         msg = lines[0] if lines else "(no message)"
     # テーブル内で問題になる文字をエスケープ。
-    # str.splitlines() は \r や   でも行を割るので、あとで既存行を読み直す
-    # ときに 1 行が途中で切れてテーブルが壊れる。改行になりうる文字を全部潰す。
-    msg = re.sub(r"[\r\n\v\f\x1c-\x1e\x85  ]+", " ", msg)
+    # str.splitlines() は \n だけでなく \r や U+2028 U+2029 でも行を割るので、
+    # あとで既存行を読み直すときに 1 行が途中で切れてテーブルが壊れる。
+    # エスケープ表記で書くのは、その文字をソースに生で置くと、このファイル自体を
+    # 行単位で読む道具が同じ壊れ方をするため。
+    msg = re.sub(r"[\r\n\v\f\x1c-\x1e\x85\u2028\u2029]+", " ", msg)
     msg = msg.replace("|", "\\|")
     return msg[:200]  # 最大200文字
 
@@ -79,7 +81,7 @@ def build_table(rows: list[str]) -> str:
 
 
 
-def update_readme(new_row: str) -> None:
+def update_readme(new_row: str, issue_number: str) -> None:
     with open(README_PATH, "r", encoding="utf-8") as f:
         content = f.read()
 
@@ -89,6 +91,12 @@ def update_readme(new_row: str) -> None:
 
     match = pattern.search(content)
     existing_rows = parse_existing_rows(match.group(0)) if match else []
+
+    # git push は commit が受理されたあとに失敗を返すことがある。ワークフローが
+    # 再試行すると同じ Issue をもう一度書き足してしまうので、Issue 番号で
+    # 上書きする。二重登録より、同じ行を書き直す方が安全。
+    marker = f"/issues/{issue_number}\""
+    existing_rows = [row for row in existing_rows if marker not in row]
 
     # 新しいエントリを先頭に追加し、最大件数にクリップ
     all_rows = [new_row] + existing_rows
@@ -112,7 +120,7 @@ def main():
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     row = build_row(user, message, ts, issue_number)
 
-    update_readme(row)
+    update_readme(row, issue_number)
     print(f"✅ Added message from @{user}: {message}")
 
 
