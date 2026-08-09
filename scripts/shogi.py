@@ -65,6 +65,9 @@ KANJI = {
 
 RANKS = "abcdefghi"
 
+MAX_PLAYERS = 200      # 表示は人数だけなので、全員を覚えても state が膨らむだけ。
+MAX_LOG_GAMES = 100    # 古い対局から落とす。
+
 GOLD = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, 0)]
 
 # 駒ごとの (1 マスだけ動く方向, 何マスでも滑る方向)。先手基準で行が減る向きが前。
@@ -162,15 +165,27 @@ def blank_state() -> dict:
 
 
 def load_state() -> dict:
+    """壊れた状態ファイルで盤が永久に止まらないよう、読めない分は初期値で埋める。"""
     if not STATE_PATH.exists():
         return blank_state()
-    state = json.loads(STATE_PATH.read_text(encoding="utf-8"))
-    board = state.get("board")
-    if not isinstance(board, list) or len(board) != N:
-        return blank_state()
-    if any(not isinstance(r, list) or len(r) != N for r in board):
-        return blank_state()
-    return state
+    fresh = blank_state()
+    try:
+        stored = json.loads(STATE_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return fresh
+    if not isinstance(stored, dict):
+        return fresh
+
+    board = stored.get("board")
+    if (not isinstance(board, list) or len(board) != N
+            or any(not isinstance(r, list) or len(r) != N for r in board)):
+        return fresh
+
+    # 欠けたキーは初期値のまま残す
+    for key, value in stored.items():
+        if key in fresh:
+            fresh[key] = value
+    return fresh
 
 
 # --------------------------------------------------------------------------
@@ -351,9 +366,12 @@ def img(name: str, alt: str) -> str:
     return f'<img src="{ASSET}/{name}.svg" width="44" height="48" alt="{alt}">'
 
 
-def koma_img(cell: str) -> str:
+def koma_img(cell: str, square: str) -> str:
     kind = kind_of(cell)
-    return img(side_of(cell) + kind.replace("+", "p"), KANJI[kind])
+    name = side_of(cell) + kind.replace("+", "p")
+    # 先後の別は駒の向きでしか描いていないので、読み上げには言葉で入れる
+    side = SIDE_NAME[side_of(cell)].lower()
+    return img(name, f"{square} {side} {WORD.get(kind.lstrip('+'), 'king')}")
 
 
 def render_board(state: dict) -> str:
@@ -377,15 +395,22 @@ def render_board(state: dict) -> str:
         for c in range(N):
             cell = board[r][c]
             sq = to_sq(r, c)
-            inner = koma_img(cell) if cell else img("empty", "")
-
-            if (r, c) in targets:
-                link = issue_url(f"mv {selected}{sq}")
-                cells.append(f'<td><a href="{link}">{inner if cell else "⭕"}</a></td>')
-            elif not over and not state["pending"] and cell and side_of(cell) == turn:
-                cells.append(f'<td><a href="{issue_url(f"sel {sq}")}">{inner}</a></td>')
+            target = (r, c) in targets
+            if cell:
+                inner = koma_img(cell, sq)
             else:
-                cells.append(f"<td>{inner}</td>")
+                inner = img("target" if target else "empty",
+                            f"{sq} legal move" if target else "")
+
+            if target:
+                href = issue_url(f"mv {selected}{sq}")
+            elif not over and not state["pending"] and cell and side_of(cell) == turn:
+                href = issue_url(f"sel {sq}")
+            else:
+                # 自前でリンクを張らないと GitHub が画像を raw SVG へのリンクで
+                # 包む。空きマスを押した visitor が .svg を開く羽目になる。
+                href = f"https://github.com/{REPO}#shogi"
+            cells.append(f'<td><a href="{href}">{inner}</a></td>')
         rows.append(f"<tr><th>{RANKS[r]}</th>{''.join(cells)}</tr>")
 
     return '<table align="center">\n' + "\n".join(rows) + "\n</table>"
@@ -440,7 +465,7 @@ def render(state: dict) -> str:
     lines.append("")
 
     if status != "playing":
-        call = f'<a href="{issue_url("new")}">次の対局を始める</a>'
+        call = f'<a href="{issue_url("new")}">Start a new game</a>'
     elif state["pending"]:
         yes = issue_url("pro yes")
         no = issue_url("pro no")
@@ -513,8 +538,13 @@ def append_log(state: dict) -> None:
         "  " + " ".join(moves[i:i + 12]) for i in range(0, len(moves), 12)
     )
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
-    with LOG_PATH.open("a", encoding="utf-8") as f:
-        f.write(header + "\n" + (body + "\n" if body else "") + "\n")
+    entry = header + "\n" + (body + "\n" if body else "") + "\n"
+    existing = LOG_PATH.read_text(encoding="utf-8") if LOG_PATH.exists() else ""
+    head, _, rest = existing.partition("\n\n")
+    games = [g for g in rest.split("\n\n") if g.strip()]
+    games.append(entry.strip())
+    games = games[-MAX_LOG_GAMES:]
+    LOG_PATH.write_text(head + "\n\n" + "\n\n".join(games) + "\n\n", encoding="utf-8")
 
 
 def record_win(state: dict, winner: str, reason: str) -> None:
@@ -533,9 +563,11 @@ def finish_turn(state: dict, note: str) -> str:
     state["selected"] = None
     state["pending"] = None
 
-    if is_checkmate(state, other):
-        record_win(state, GOTE if other == SENTE else SENTE, "Checkmate")
-        return f"{note} Checkmate. {SIDE_NAME[state['winner']]} wins."
+    # 将棋にステイルメイトは無い。指す手が無い側がそのまま負け。
+    if not has_any_legal_move(state, other):
+        reason = "Checkmate" if in_check(state["board"], other) else "Stalemate"
+        record_win(state, GOTE if other == SENTE else SENTE, reason)
+        return f"{note} {reason}. {SIDE_NAME[state['winner']]} wins."
     if in_check(state["board"], other):
         return f"{note} Check."
     return note
@@ -563,6 +595,8 @@ def play(state: dict, command: str, user: str) -> str:
         return "That game is over. Start a new one."
 
     if verb == "resign":
+        if user not in state.get("players", []):
+            return "Play a move first, then you can resign."
         loser = state["turn"]
         winner = GOTE if loser == SENTE else SENTE
         state["last"] = record_move(state, "resigns")
@@ -597,10 +631,15 @@ def play(state: dict, command: str, user: str) -> str:
         return "Selected. Now click a square."
 
     if verb == "mv":
+        if state["pending"]:
+            return "Answer the promotion question first."
         selected = state["selected"]
         if not selected:
             return "Pick a piece first."
         arg = parts[1]
+        # 盤が動いたあとの古いリンクを、今選ばれている駒に適用しない
+        if arg[:-2] != selected:
+            return "The board moved on since that link was drawn. Click again."
 
         if selected.startswith("*"):
             piece = selected[1:]
@@ -675,16 +714,25 @@ def main() -> None:
 
     command = parse(title)
     if command is None:
-        sys.exit(f"'{title}' is not a shogi command")
+        # exit 1 にすると heredoc が閉じず、ワークフローが赤くなって
+        # issue も閉じられない。読めない指し手はただの返事で済ませる。
+        print("That is not a move I can read. Click a piece on the board instead.")
+        return
 
     state = load_state()
+    before = json.dumps(state["board"], ensure_ascii=False)
     message = play(state, command, user)
 
-    if command not in ("new", "cancel") and user not in state["players"]:
+    # 盤が動いたときだけ「指した人」に数える。弾かれたクリックは数えない。
+    moved = json.dumps(state["board"], ensure_ascii=False) != before
+    if moved and user not in state["players"]:
         state["players"].append(user)
+        del state["players"][:-MAX_PLAYERS]
 
-    STATE_PATH.write_text(json.dumps(state, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
     write_readme(state)
+    tmp = STATE_PATH.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(state, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    os.replace(tmp, STATE_PATH)
     print(message)
 
 
