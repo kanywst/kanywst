@@ -9,6 +9,10 @@ Wikimedia Commons には未成駒 9 種の写真しかなく、成駒も後手�
 14 種 × 先後 2 向き = 28 枚をここで描く。五角形は駒の形そのままで、後手の駒は
 180 度回転させる。盤上でどちらの駒か分かる方法は向きしかないため。
 
+The same 28 are written again as "selected" variants with a red frame. GitHub strips
+style attributes from README HTML, so a square cannot be highlighted with CSS.
+Swapping the image is the only way to show which piece is selected.
+
 成駒の字を朱にするのは実際の駒と同じ。
 """
 
@@ -26,6 +30,7 @@ PROMOTED_INK = "#b3261e"
 FACE = "#f0d9a8"
 EDGE = "#8b6f47"
 CELL = "#f7efdc"
+SELECTED_CELL = "#fbe0d5"
 MARKER = "#c1121f"
 
 # CJK フォントは環境ごとに名前が違うので、実在しそうなものを順に並べて
@@ -53,16 +58,22 @@ PIECES = {
 }
 
 
-def svg(label: str, promoted: bool, gote: bool) -> str:
+def svg(label: str, promoted: bool, gote: bool, selected: bool = False) -> str:
     ink = PROMOTED_INK if promoted else INK
     # 後手の駒は盤ごと 180 度回して置くので、駒も回す
     rotate = f' transform="rotate(180 {W / 2} {H / 2})"' if gote else ""
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="{label}">
-  <rect x="0.75" y="0.75" width="{W - 1.5}" height="{H - 1.5}" fill="{CELL}" stroke="{EDGE}" stroke-width="1.5"/>
+    # Frame the selected square in the same red as the move markers, so that
+    # "this piece goes to those circles" reads at a glance.
+    face = SELECTED_CELL if selected else CELL
+    frame = (f'\n  <rect x="2.25" y="2.25" width="{W - 4.5}" height="{H - 4.5}" fill="none"'
+             f' stroke="{MARKER}" stroke-width="3"/>' if selected else "")
+    aria = f"{label} selected" if selected else label
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="{aria}">
+  <rect x="0.75" y="0.75" width="{W - 1.5}" height="{H - 1.5}" fill="{face}" stroke="{EDGE}" stroke-width="1.5"/>
   <g{rotate}>
     <polygon points="{POINTS}" fill="{FACE}" stroke="{EDGE}" stroke-width="1.5" stroke-linejoin="round"/>
     <text x="{W / 2}" y="34" font-family="{FONT}" font-size="24" fill="{ink}" text-anchor="middle">{label}</text>
-  </g>
+  </g>{frame}
 </svg>
 """
 
@@ -74,9 +85,10 @@ def main() -> None:
         for side, gote in (("s", False), ("g", True)):
             name = piece.replace("+", "p")
             text = "玉" if piece == "K" and gote else label
-            path = OUT / f"{side}{name}.svg"
-            path.write_text(svg(text, promoted, gote), encoding="utf-8")
-            written += 1
+            for suffix, selected in (("", False), ("-sel", True)):
+                path = OUT / f"{side}{name}{suffix}.svg"
+                path.write_text(svg(text, promoted, gote, selected), encoding="utf-8")
+                written += 1
 
     # 空マスと移動先。盤の枠は自分で描く。透明にしておくと、盤の格子が
     # GitHub の画像プレースホルダの背景色に依存してしまう。
@@ -92,7 +104,8 @@ def main() -> None:
 """,
             encoding="utf-8",
         )
-    print(f"wrote {written + 1} files to {OUT}")
+        written += 1
+    print(f"wrote {written} files to {OUT}")
 
 
 if __name__ == "__main__":

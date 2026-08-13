@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 48" width="44" height="48" role="img" aria-label="桂 selected">
+  <rect x="0.75" y="0.75" width="42.5" height="46.5" fill="#fbe0d5" stroke="#8b6f47" stroke-width="1.5"/>
+  <g>
+    <polygon points="22,3 37,11 40,45 4,45 7,11" fill="#f0d9a8" stroke="#8b6f47" stroke-width="1.5" stroke-linejoin="round"/>
+    <text x="22.0" y="34" font-family="'Hiragino Mincho ProN','Yu Mincho','YuMincho','Noto Serif CJK JP','Noto Serif JP','Source Han Serif JP','MS Mincho',serif" font-size="24" fill="#1f2328" text-anchor="middle">桂</text>
+  </g>
+  <rect x="2.25" y="2.25" width="39.5" height="43.5" fill="none" stroke="#c1121f" stroke-width="3"/>
+</svg>

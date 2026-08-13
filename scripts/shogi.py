@@ -402,12 +402,13 @@ def img(name: str, alt: str) -> str:
     return f'<img src="{ASSET}/{name}.svg" width="44" height="48" alt="{alt}">'
 
 
-def koma_img(cell: str, square: str) -> str:
+def koma_img(cell: str, square: str, selected: bool = False) -> str:
     kind = kind_of(cell)
-    name = side_of(cell) + kind.replace("+", "p")
+    name = side_of(cell) + kind.replace("+", "p") + ("-sel" if selected else "")
     # 先後の別は駒の向きでしか描いていないので、読み上げには言葉で入れる
     side = SIDE_NAME[side_of(cell)].lower()
-    return img(name, f"{square} {side} {WORD.get(kind.lstrip('+'), 'king')}")
+    word = WORD.get(kind.lstrip("+"), "king")
+    return img(name, f"{square} {side} {word}{' selected' if selected else ''}")
 
 
 def render_board(state: dict) -> str:
@@ -433,7 +434,7 @@ def render_board(state: dict) -> str:
             sq = to_sq(r, c)
             target = (r, c) in targets
             if cell:
-                inner = koma_img(cell, sq)
+                inner = koma_img(cell, sq, selected=(sq == selected))
             else:
                 inner = img("target" if target else "empty",
                             f"{sq} legal move" if target else "")
@@ -481,12 +482,17 @@ def render(state: dict) -> str:
     if status != "playing":
         headline = f"{state.get('reason', 'Checkmate')}. {SIDE_NAME[state['winner']]} wins."
     elif state["pending"]:
-        headline = "Promote?"
+        # The piece has not moved yet, so name both squares. "Promote?" alone
+        # does not say what is being promoted.
+        headline = (f"{state['pending']['from']} to {state['pending']['to']}."
+                    " Promote the piece in the red frame?")
     elif state["selected"]:
         if state["selected"].startswith("*"):
-            headline = f"Dropping a {WORD[state['selected'][1:]]}. Circles are legal."
+            headline = (f"Dropping a {WORD[state['selected'][1:]]}."
+                        " Click a red circle to place it.")
         else:
-            headline = f"{state['selected']} selected. Circles are legal."
+            headline = (f"The piece in the red frame on {state['selected']} is selected."
+                        " Click a red circle to move it there.")
     else:
         check = "Check. " if in_check(state["board"], turn) else ""
         headline = f"{check}{SIDE_NAME[turn]} to move."
@@ -507,7 +513,14 @@ def render(state: dict) -> str:
         no = issue_url("pro no")
         call = f'<a href="{yes}">Yes</a> · <a href="{no}">No</a>'
     elif state["selected"]:
-        call = f'<a href="{issue_url("cancel")}">Pick something else</a>'
+        # The headline above the board is easy to scroll past, so the circles
+        # are explained under the board as well.
+        if state["selected"].startswith("*"):
+            where = f"you can drop the {WORD[state['selected'][1:]]}"
+        else:
+            where = f"the piece on {state['selected']} can go"
+        call = (f"Red circles are where {where}"
+                f' · <a href="{issue_url("cancel")}">Pick something else</a>')
     else:
         # 詰まない局面で盤が止まらないよう投了を置く
         call = (
