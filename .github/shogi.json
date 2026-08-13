@@ -105,7 +105,7 @@
   "g": {}
  },
  "turn": "s",
- "selected": null,
+ "selected": "7g",
  "pending": null,
  "status": "playing",
  "winner": null,
