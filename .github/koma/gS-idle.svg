@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 48" width="44" height="48" role="img" aria-label="銀">
+  <rect x="0.75" y="0.75" width="42.5" height="46.5" fill="#f7efdc" stroke="#8b6f47" stroke-width="1.5"/>
+  <g transform="rotate(180 22.0 24.0)">
+    <polygon points="22,3 37,11 40,45 4,45 7,11" fill="#e2dbcd" stroke="#a99f8d" stroke-width="1.5" stroke-linejoin="round"/>
+    <text x="22.0" y="34" font-family="'Hiragino Mincho ProN','Yu Mincho','YuMincho','Noto Serif CJK JP','Noto Serif JP','Source Han Serif JP','MS Mincho',serif" font-size="24" fill="#6f6a62" text-anchor="middle">銀</text>
+  </g>
+</svg>
