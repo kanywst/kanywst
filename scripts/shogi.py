@@ -411,15 +411,20 @@ def img(name: str, alt: str) -> str:
     return f'<img src="{ASSET}/{name}.svg" align="top" alt="{alt}">'
 
 
-def koma_img(cell: str, square: str, selected: bool = False, idle: bool = False) -> str:
+def koma_img(cell: str, square: str, selected: bool = False,
+             waiting: bool = False, to_move: bool = False,
+             in_hand: bool = False) -> str:
     kind = kind_of(cell)
-    suffix = "-sel" if selected else ("-idle" if idle else "")
+    suffix = "-sel" if selected else ("-idle" if waiting else "")
     name = side_of(cell) + kind.replace("+", "p") + suffix
     # Colour carries the side and the turn on screen, and nothing carries them
-    # to a reader, so the alt text says both in words.
+    # to a reader, so the alt text says both in words. A finished game has
+    # neither a side to move nor a side waiting, and says so by saying nothing.
     side = SIDE_NAME[side_of(cell)].lower()
     word = WORD.get(kind.lstrip("+"), "king")
-    note = " selected" if selected else ("" if idle else " to move")
+    note = " selected" if selected else (" to move" if to_move else "")
+    if in_hand:
+        return img(name, f"{side} {word} in hand{note}")
     return img(name, f"{square} {side} {word}{note}")
 
 
@@ -445,9 +450,12 @@ def render_board(state: dict) -> str:
             target = (r, c) in targets
             if cell:
                 # Only the side to move keeps its colour, which is also exactly
-                # the set of pieces worth clicking.
-                idle = not over and side_of(cell) != turn
-                inner = koma_img(cell, sq, selected=(sq == selected), idle=idle)
+                # the set of pieces worth clicking. Once a game is over neither
+                # side is to move, so the board goes back to one palette.
+                its_move = not over and side_of(cell) == turn
+                inner = koma_img(cell, sq, selected=(sq == selected),
+                                 waiting=(not over and not its_move),
+                                 to_move=its_move)
             else:
                 inner = img("target" if target else "empty",
                             f"{sq} legal move" if target else "")
@@ -479,19 +487,19 @@ def render_hand(state: dict, side: str) -> str:
     if not held:
         return ""
 
-    selectable = (
-        side == state["turn"]
-        and state["status"] == "playing"
-        and not state["pending"]
-    )
+    playing = state["status"] == "playing"
+    its_move = playing and side == state["turn"]
+    selectable = its_move and not state["pending"]
     parts = []
     for piece, count in held:
-        label = KANJI[piece] + (f"×{count}" if count > 1 else "")
+        # The same piece as on the board, so a hand needs no label: its colour
+        # says whose it is and the side of the board it sits on says it again.
+        image = koma_img(side + piece, "", in_hand=True,
+                         waiting=(playing and not its_move), to_move=its_move)
         if selectable:
-            parts.append(f'<a href="{issue_url(f"sel *{piece}")}">{label}</a>')
-        else:
-            parts.append(label)
-    return "In hand: " + " ".join(parts)
+            image = f'<a href="{issue_url(f"sel *{piece}")}">{image}</a>'
+        parts.append(image + (f"×{count}" if count > 1 else ""))
+    return " ".join(parts)
 
 
 def render(state: dict) -> str:
@@ -501,7 +509,12 @@ def render(state: dict) -> str:
 
     # Only what the board cannot show. Whose move it is, it can.
     if status != "playing":
-        headline = f"{state.get('reason', 'Checkmate')}. {SIDE_NAME[state['winner']]} wins."
+        # A state file can be corrupt enough to be over with no winner and no
+        # reason: load_state checks those two independently of the status.
+        winner = state.get("winner")
+        headline = f"{state.get('reason') or 'Checkmate'}."
+        if winner in SIDE_NAME:
+            headline += f" {SIDE_NAME[winner]} wins."
     elif state["pending"]:
         # The piece has not moved yet, so name both squares. "Promote?" alone
         # does not say what is being promoted.
@@ -512,7 +525,9 @@ def render(state: dict) -> str:
             headline = (f"Dropping a {WORD[state['selected'][1:]]}."
                         " Click a red circle to place it.")
         else:
-            headline = (f"The piece in the red frame on {state['selected']} is selected."
+            # The frame says which piece without naming a square, which the
+            # board no longer labels.
+            headline = ("The piece in the red frame is selected."
                         " Click a red circle to move it there.")
     else:
         headline = "Check." if in_check(state["board"], turn) else ""
@@ -527,12 +542,14 @@ def render(state: dict) -> str:
         lines.append(f'<p align="center">{html}</p>')
         lines.append("")
 
-    if render_hand(state, GOTE):
-        centred(render_hand(state, GOTE))
+    white_hand = render_hand(state, GOTE)
+    black_hand = render_hand(state, SENTE)
+    if white_hand:
+        centred(white_hand)
     lines.append(render_board(state))
     lines.append("")
-    if render_hand(state, SENTE):
-        centred(render_hand(state, SENTE))
+    if black_hand:
+        centred(black_hand)
 
     if status != "playing":
         call = f'<a href="{issue_url("new")}">Start a new game</a>'
