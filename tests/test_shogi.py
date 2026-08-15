@@ -208,6 +208,23 @@ class Markup(Sandbox):
         self.assertIn("×2", out)
         self.assertNotIn("in hand:", out.lower())
 
+    def test_a_selection_is_framed_wherever_it_was_made(self):
+        # Not just that the art exists, but that the right art is picked: a
+        # piece picked up from hand has to show it the way one on the board does.
+        state = shogi.blank_state()
+        state["selected"] = "7g"
+        board = self.board(state)
+        self.assertEqual(board.count("sP-sel.svg"), 1)
+        self.assertIn("7g black pawn selected", board)
+
+        state = shogi.blank_state()
+        state["hands"][shogi.SENTE] = {"P": 1, "S": 1}
+        state["selected"] = "*P"
+        hand = shogi.render_hand(state, shogi.SENTE)
+        self.assertIn("sP-sel.svg", hand)
+        self.assertIn("black pawn in hand selected", hand)
+        self.assertNotIn("sS-sel.svg", hand)
+
     def test_every_image_the_renderer_names_exists(self):
         named = set()
         for state in self.states():
