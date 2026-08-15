@@ -24,7 +24,7 @@
   ],
   [
    "gP",
-   "gP",
+   "",
    "gP",
    "gP",
    "gP",
@@ -35,7 +35,7 @@
   ],
   [
    "",
-   "",
+   "gP",
    "",
    "",
    "",
@@ -104,15 +104,16 @@
   "s": {},
   "g": {}
  },
- "turn": "g",
- "selected": "8c",
+ "turn": "s",
+ "selected": null,
  "pending": null,
  "status": "playing",
  "winner": null,
  "reason": null,
- "last": "P-7f",
+ "last": "P-8d",
  "moves": [
-  "P-7f"
+  "P-7f",
+  "P-8d"
  ],
  "games": 0,
  "record": {
