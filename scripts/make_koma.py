@@ -14,9 +14,9 @@ The same 28 are written again as "selected" variants with a red frame. GitHub st
 style attributes from README HTML, so a square cannot be highlighted with CSS.
 Swapping the image is the only way to show which piece is selected.
 
-Both kings are written a third time as "-turn" variants, framed in a pulsing blue.
-A single line of text above the board is easy to miss; SMIL inside an SVG animates
-even through <img>, the same trick as the blinking wordmark cursor.
+It also draws the two name plates that sit above and below the board. The plate
+of the side to move is inked dark, the waiting one is left pale, so whose turn it
+is reads from across the page and from the side of the board it belongs to.
 
 Promoted pieces are inked in red, as they are on a real board.
 """
@@ -37,9 +37,14 @@ EDGE = "#8b6f47"
 CELL = "#f7efdc"
 SELECTED_CELL = "#fbe0d5"
 MARKER = "#c1121f"
-# Not the marker red: a turn frame in that colour reads as "selected".
-TURN_CELL = "#e4eefa"
-TURN_MARKER = "#0f5ba8"
+
+# The name plates. Ink and paper rather than a second accent colour: the red is
+# already spoken for by selection and move markers.
+PLATE_W, PLATE_H = W * 9, 40
+PLATE_INKED = "#5a4632"
+PLATE_INKED_EDGE = "#3f3226"
+PLATE_PAPER_EDGE = "#c9b48d"
+PLATE_PAPER_INK = "#8a7660"
 
 # CJK fonts are named differently on every platform, so the likely ones are
 # listed in order and fall back to generic serif. An SVG loaded through <img>
@@ -66,34 +71,40 @@ PIECES = {
 }
 
 
-def svg(label: str, promoted: bool, gote: bool, selected: bool = False,
-        turn: bool = False) -> str:
+def svg(label: str, promoted: bool, gote: bool, selected: bool = False) -> str:
     ink = PROMOTED_INK if promoted else INK
     # White sits across the board, so the piece is turned with it.
     rotate = f' transform="rotate(180 {W / 2} {H / 2})"' if gote else ""
-    face = SELECTED_CELL if selected else (TURN_CELL if turn else CELL)
-    frame = ""
-    aria = label
-    if selected:
-        # The same red as the move markers, so that "this piece goes to those
-        # circles" reads at a glance.
-        frame = (f'\n  <rect x="2.25" y="2.25" width="{W - 4.5}" height="{H - 4.5}" fill="none"'
-                 f' stroke="{MARKER}" stroke-width="3"/>')
-        aria = f"{label} selected"
-    elif turn:
-        # A still frame gets lost in the grid; the pulse is what catches the eye.
-        frame = (f'\n  <rect x="2.25" y="2.25" width="{W - 4.5}" height="{H - 4.5}" fill="none"'
-                 f' stroke="{TURN_MARKER}" stroke-width="3">'
-                 f'\n    <animate attributeName="opacity" values="1;0.25;1"'
-                 f' dur="2.4s" repeatCount="indefinite"/>'
-                 f'\n  </rect>')
-        aria = f"{label} to move"
+    # The selected square is framed in the same red as the move markers, so that
+    # "this piece goes to those circles" reads at a glance.
+    face = SELECTED_CELL if selected else CELL
+    frame = (f'\n  <rect x="2.25" y="2.25" width="{W - 4.5}" height="{H - 4.5}" fill="none"'
+             f' stroke="{MARKER}" stroke-width="3"/>' if selected else "")
+    aria = f"{label} selected" if selected else label
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="{aria}">
   <rect x="0.75" y="0.75" width="{W - 1.5}" height="{H - 1.5}" fill="{face}" stroke="{EDGE}" stroke-width="1.5"/>
   <g{rotate}>
     <polygon points="{POINTS}" fill="{FACE}" stroke="{EDGE}" stroke-width="1.5" stroke-linejoin="round"/>
     <text x="{W / 2}" y="34" font-family="{FONT}" font-size="24" fill="{ink}" text-anchor="middle">{label}</text>
   </g>{frame}
+</svg>
+"""
+
+
+def plate(side: str, state: str) -> str:
+    """A name plate, as wide as the board. state is idle, turn or win."""
+    mark = "▲" if side == "s" else "△"
+    name = "BLACK" if side == "s" else "WHITE"
+    label = {"idle": f"{mark} {name}",
+             "turn": f"{mark} {name} · to move",
+             "win": f"{mark} {name} · wins"}[state]
+    inked = state != "idle"
+    face = PLATE_INKED if inked else CELL
+    edge = PLATE_INKED_EDGE if inked else PLATE_PAPER_EDGE
+    ink = CELL if inked else PLATE_PAPER_INK
+    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {PLATE_W} {PLATE_H}" width="{PLATE_W}" height="{PLATE_H}" role="img" aria-label="{label}">
+  <rect x="0.75" y="0.75" width="{PLATE_W - 1.5}" height="{PLATE_H - 1.5}" fill="{face}" stroke="{edge}" stroke-width="1.5"/>
+  <text x="{PLATE_W / 2}" y="26" font-family="{FONT}" font-size="17" letter-spacing="2" fill="{ink}" text-anchor="middle">{label}</text>
 </svg>
 """
 
@@ -105,13 +116,15 @@ def main() -> None:
         for side, gote in (("s", False), ("g", True)):
             name = piece.replace("+", "p")
             text = "玉" if piece == "K" and gote else label
-            variants = [("", False, False), ("-sel", True, False)]
-            if piece == "K":
-                variants.append(("-turn", False, True))
-            for suffix, selected, turn in variants:
+            for suffix, selected in (("", False), ("-sel", True)):
                 path = OUT / f"{side}{name}{suffix}.svg"
-                path.write_text(svg(text, promoted, gote, selected, turn), encoding="utf-8")
+                path.write_text(svg(text, promoted, gote, selected), encoding="utf-8")
                 written += 1
+
+    for side in ("s", "g"):
+        for suffix, state in (("", "idle"), ("-turn", "turn"), ("-win", "win")):
+            (OUT / f"plate-{side}{suffix}.svg").write_text(plate(side, state), encoding="utf-8")
+            written += 1
 
     # Empty squares and move targets, each drawing its own border. Left
     # transparent, the grid would take the colour of GitHub's image placeholder.
