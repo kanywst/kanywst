@@ -1,0 +1,49 @@
+name: Checks
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: Tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Markdown
+        run: npx --yes markdownlint-cli2 "**/*.md"
+
+      # The pieces are committed output. Nothing regenerates them on a move, so
+      # an edit to the generator without a rerun leaves the board pointing at
+      # art that no longer matches, or at a file that was never written.
+      - name: The pieces match their generator
+        run: |
+          python scripts/make_koma.py
+          git diff --exit-code --stat .github/koma \
+            || { echo "::error::run scripts/make_koma.py and commit .github/koma"; exit 1; }
+          test -z "$(git status --porcelain .github/koma)" \
+            || { echo "::error::scripts/make_koma.py writes files that are not committed"; exit 1; }
+
+      # The board in README.md is output too, drawn from .github/shogi.json.
+      # A renderer change without a redraw ships a stale board to the profile.
+      - name: The board matches the state it is drawn from
+        run: |
+          python -c "import sys; sys.path.insert(0, 'scripts'); import shogi; shogi.write_readme(shogi.load_state())"
+          git diff --exit-code --stat README.md \
+            || { echo "::error::the SHOGI block is stale, redraw it from .github/shogi.json"; exit 1; }
