@@ -2,12 +2,13 @@
 """
 make_koma.py
 
-将棋の駒画像 (.github/koma/*.svg) を生成する。一度だけ走らせる類のもので、
-Action からは呼ばれない。
+Draws the shogi piece images (.github/koma/*.svg). Run by hand once, never from
+the Action.
 
-Wikimedia Commons には未成駒 9 種の写真しかなく、成駒も後手向きの駒も無いため、
-14 種 × 先後 2 向き = 28 枚をここで描く。五角形は駒の形そのままで、後手の駒は
-180 度回転させる。盤上でどちらの駒か分かる方法は向きしかないため。
+Wikimedia Commons only has photographs of the 9 unpromoted pieces, with nothing
+promoted and nothing facing the other way, so all 14 kinds x 2 directions = 28
+are drawn here. The pentagon is the shape of a real piece; White's are turned
+180 degrees, since orientation is the only thing that says whose piece it is.
 
 The same 28 are written again as "selected" variants with a red frame. GitHub strips
 style attributes from README HTML, so a square cannot be highlighted with CSS.
@@ -17,7 +18,7 @@ Both kings are written a third time as "-turn" variants, framed in a pulsing blu
 A single line of text above the board is easy to miss; SMIL inside an SVG animates
 even through <img>, the same trick as the blinking wordmark cursor.
 
-成駒の字を朱にするのは実際の駒と同じ。
+Promoted pieces are inked in red, as they are on a real board.
 """
 
 import pathlib
@@ -26,7 +27,7 @@ OUT = pathlib.Path(".github/koma")
 
 W, H = 44, 48
 
-# 五角形。上が尖った駒の形。
+# The pentagon, pointed end up.
 POINTS = "22,3 37,11 40,45 4,45 7,11"
 
 INK = "#1f2328"
@@ -40,12 +41,12 @@ MARKER = "#c1121f"
 TURN_CELL = "#e4eefa"
 TURN_MARKER = "#0f5ba8"
 
-# CJK フォントは環境ごとに名前が違うので、実在しそうなものを順に並べて
-# 最後に総称 serif へ落とす。<img> で読み込まれた SVG は閲覧者側の
-# フォントで解決されるため、特定の 1 つに賭けられない。
+# CJK fonts are named differently on every platform, so the likely ones are
+# listed in order and fall back to generic serif. An SVG loaded through <img>
+# resolves fonts on the reader's machine, so no single name can be relied on.
 FONT = "'Hiragino Mincho ProN','Yu Mincho','YuMincho','Noto Serif CJK JP','Noto Serif JP','Source Han Serif JP','MS Mincho',serif"
 
-# 駒 ID -> (表記, 成駒か)
+# piece id -> (label, promoted)
 PIECES = {
     "P": ("歩", False),
     "L": ("香", False),
@@ -54,7 +55,7 @@ PIECES = {
     "G": ("金", False),
     "B": ("角", False),
     "R": ("飛", False),
-    # 先手が王将、後手が玉将。実際の駒と同じ。
+    # Black gets 王将 and White 玉将, as on a real set.
     "K": ("王", False),
     "+P": ("と", True),
     "+L": ("杏", True),
@@ -68,7 +69,7 @@ PIECES = {
 def svg(label: str, promoted: bool, gote: bool, selected: bool = False,
         turn: bool = False) -> str:
     ink = PROMOTED_INK if promoted else INK
-    # 後手の駒は盤ごと 180 度回して置くので、駒も回す
+    # White sits across the board, so the piece is turned with it.
     rotate = f' transform="rotate(180 {W / 2} {H / 2})"' if gote else ""
     face = SELECTED_CELL if selected else (TURN_CELL if turn else CELL)
     frame = ""
@@ -112,8 +113,8 @@ def main() -> None:
                 path.write_text(svg(text, promoted, gote, selected, turn), encoding="utf-8")
                 written += 1
 
-    # 空マスと移動先。盤の枠は自分で描く。透明にしておくと、盤の格子が
-    # GitHub の画像プレースホルダの背景色に依存してしまう。
+    # Empty squares and move targets, each drawing its own border. Left
+    # transparent, the grid would take the colour of GitHub's image placeholder.
     for name, extra in (
         ("empty", ""),
         ("target", f'<circle cx="{W / 2}" cy="{H / 2}" r="9" fill="none" stroke="{MARKER}" stroke-width="4"/>'),

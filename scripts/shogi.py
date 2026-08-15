@@ -2,31 +2,33 @@
 """
 shogi.py
 
-GitHub Actions から呼び出され、Issue のタイトルを 1 手として将棋の局面に反映し、
-README.md の SHOGI マーカー間を描き直す。
+Called from GitHub Actions. Reads an issue title as one move, plays it, and
+redraws the SHOGI block in README.md.
 
-ゲストブックと同じ仕組み (Issue を立てる → Action → マーカー間を書き換え)。
+Same machinery as the guest book: open an issue -> Action -> rewrite between
+the markers.
 
-指し手は 2 手順のクリックで進む。盤上の駒か持ち駒をクリックして選び、
-次に行ける升をクリックする。合法手を全部リンクにすると数百本になるため、
-選択してから行き先だけを出す。marcizhu のチェスと同じ操作。
+A move takes two clicks. Click a piece on the board or in hand to select it,
+then click a square it can reach. Linking every legal move at once would mean
+hundreds of links, so the destinations only appear once something is selected.
+The same handling as marcizhu's chess board.
 
-Issue タイトル:
-  shogi|sel 7g      - 盤上の駒を選ぶ
-  shogi|sel *P      - 持ち駒を選ぶ
-  shogi|mv 7g7f     - 選んだ駒を動かす / 打つ
-  shogi|pro yes|no  - 成るかどうかを答える
-  shogi|cancel      - 選択をやめる
-  shogi|resign      - 投了する。詰みまで行かない局面で盤が止まるのを防ぐ
-  shogi|new         - 決着後に次の対局を始める
+Issue titles:
+  shogi|sel 7g      - select a piece on the board
+  shogi|sel *P      - select a piece in hand
+  shogi|mv 7g7f     - move or drop the selected piece
+  shogi|pro yes|no  - answer the promotion question
+  shogi|cancel      - drop the selection
+  shogi|resign      - resign, so a game that never reaches mate can still end
+  shogi|new         - start the next game once one is decided
 
-勝敗は対局をまたいで .github/shogi.json に残る。終局しても自動では初期化せず、
-だれかが「次の対局を始める」を押すまで結果を出したままにする。
+The running record lives across games in .github/shogi.json. A finished game is
+not cleared automatically; the result stays up until someone starts a new one.
 
-環境変数:
+Environment:
   ISSUE_TITLE / ISSUE_USER / ISSUE_NUMBER
 
-標準出力が Issue へのコメントになる。
+Standard output becomes the comment on the issue.
 """
 
 import json
@@ -65,12 +67,13 @@ KANJI = {
 
 RANKS = "abcdefghi"
 
-MAX_PLAYERS = 200      # 表示は人数だけなので、全員を覚えても state が膨らむだけ。
-MAX_LOG_GAMES = 100    # 古い対局から落とす。
+MAX_PLAYERS = 200      # Only the count is shown; keeping everyone just grows the state.
+MAX_LOG_GAMES = 100    # The oldest games fall off first.
 
 GOLD = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, 0)]
 
-# 駒ごとの (1 マスだけ動く方向, 何マスでも滑る方向)。先手基準で行が減る向きが前。
+# Per piece: (directions it steps one square, directions it slides any distance).
+# Written for Black, whose forward is the direction the row number decreases.
 STEPS = {
     "P": [(-1, 0)],
     "N": [(-2, -1), (-2, 1)],
@@ -93,8 +96,8 @@ INITIAL_BACK = ["L", "N", "S", "G", "K", "G", "S", "N", "L"]
 
 
 # --------------------------------------------------------------------------
-# 座標。筋は右から 1..9 なので、表示上の左端 (9 筋) が列 0 になる。
-# 段は上から a..i で、行 0 が 一段目。
+# Coordinates. Files count 1..9 from the right, so the leftmost file on screen
+# (file 9) is column 0. Ranks run a..i from the top, so row 0 is rank a.
 # --------------------------------------------------------------------------
 
 def to_sq(row: int, col: int) -> str:
@@ -128,7 +131,7 @@ def forward(side: str) -> int:
 
 
 # --------------------------------------------------------------------------
-# 局面
+# Position
 # --------------------------------------------------------------------------
 
 def initial_board() -> list[list[str]]:
@@ -165,7 +168,8 @@ def blank_state() -> dict:
 
 
 def load_state() -> dict:
-    """壊れた状態ファイルで盤が永久に止まらないよう、読めない分は初期値で埋める。"""
+    """Fill whatever cannot be read with defaults, so a broken state file does not
+    stop the board for good."""
     if not STATE_PATH.exists():
         return blank_state()
     fresh = blank_state()
@@ -181,7 +185,7 @@ def load_state() -> dict:
             or any(not isinstance(r, list) or len(r) != N for r in board)):
         return fresh
 
-    # 盤の中身も見る。形だけ合っていて中身が壊れていると描画で落ちる。
+    # Check the cells too. The right shape with wrong contents crashes the render.
     known = set(KANJI) | {""}
     for row in board:
         for cell in row:
@@ -197,7 +201,7 @@ def load_state() -> dict:
                                 for k, n in h.items())
                         for h in value.values()))
 
-    # 型が合うものだけ受け入れる。合わないキーは初期値のまま残して先へ進む。
+    # Take only what type checks. A key that does not is left at its default.
     checks = {
         "board": lambda v: True,
         "hands": hands_ok,
@@ -225,17 +229,18 @@ def load_state() -> dict:
 
 
 # --------------------------------------------------------------------------
-# 利き
+# Reach
 # --------------------------------------------------------------------------
 
 def destinations(board: list[list[str]], row: int, col: int) -> list[tuple[int, int]]:
-    """その駒が動ける升。自分の駒がいる升は除くが、王手放置は見ない。"""
+    """Squares the piece can reach. Own pieces are excluded, but a move that leaves
+    the king in check is not."""
     cell = board[row][col]
     side = side_of(cell)
     kind = kind_of(cell)
     out = []
 
-    # 表の方向は先手基準。後手は前後を反転させる。
+    # The tables are written for Black, so White's forward is flipped.
     def step_row(drow: int) -> int:
         return drow if side == SENTE else -drow
 
@@ -285,7 +290,7 @@ def promotion_zone(row: int, side: str) -> bool:
 
 
 def must_promote(kind: str, row: int, side: str) -> bool:
-    """行き所のない駒になる場合は成るしかない。"""
+    """A piece that would have nowhere left to go has to promote."""
     last = 0 if side == SENTE else N - 1
     second = 1 if side == SENTE else N - 2
     if kind in ("P", "L"):
@@ -314,13 +319,13 @@ def apply_move(board, hands, frm, to, promote) -> None:
 
 
 def legal_moves_from(state: dict, frm: tuple[int, int]) -> list[tuple[int, int]]:
-    """王手放置を除いた行き先。"""
+    """Destinations, minus the ones that leave the king in check."""
     board = state["board"]
     side = side_of(board[frm[0]][frm[1]])
     kind = kind_of(board[frm[0]][frm[1]])
     out = []
     for to in destinations(board, *frm):
-        # 成らないと行き所が無いなら、成る前提で合法性を見る
+        # Where staying unpromoted leaves it stuck, test the move as a promotion
         promote = must_promote(kind, to[0], side)
         trial = [row[:] for row in board]
         trial_hands = {s: dict(h) for s, h in state["hands"].items()}
@@ -335,7 +340,7 @@ def legal_drops(state: dict, piece: str, check_pawn_mate: bool = True) -> list[t
     side = state["turn"]
     out = []
 
-    # 二歩。同じ筋に成っていない歩があるなら打てない。
+    # Two pawns on one file. A file already holding an unpromoted pawn is closed.
     blocked_files = set()
     if piece == "P":
         for c in range(N):
@@ -357,8 +362,9 @@ def legal_drops(state: dict, piece: str, check_pawn_mate: bool = True) -> list[t
             trial[r][c] = side + piece
             if in_check(trial, side):
                 continue
-            # 打ち歩詰め。相手に逃げ道があるかを見るが、その中でさらに
-            # 打ち歩詰めを見にいくと再帰が終わらないので、そこでは打ち切る。
+            # Mate by dropping a pawn. This asks whether the opponent has a way
+            # out, and looking for another pawn drop mate inside that answer
+            # never terminates, so the search stops one level down.
             if piece == "P" and check_pawn_mate:
                 other = GOTE if side == SENTE else SENTE
                 trial_state = {"board": trial, "hands": state["hands"], "turn": other}
@@ -389,7 +395,7 @@ def is_checkmate(state: dict, side: str) -> bool:
 
 
 # --------------------------------------------------------------------------
-# 描画
+# Rendering
 # --------------------------------------------------------------------------
 
 def issue_url(command: str) -> str:
@@ -398,7 +404,7 @@ def issue_url(command: str) -> str:
 
 
 def img(name: str, alt: str) -> str:
-    # HTML テーブルの中なので markdown の ![]() は展開されない。img で書く。
+    # Inside an HTML table markdown's ![]() does not expand, so write img.
     return f'<img src="{ASSET}/{name}.svg" width="44" height="48" alt="{alt}">'
 
 
@@ -406,7 +412,7 @@ def koma_img(cell: str, square: str, selected: bool = False, to_move: bool = Fal
     kind = kind_of(cell)
     suffix = "-sel" if selected else ("-turn" if to_move else "")
     name = side_of(cell) + kind.replace("+", "p") + suffix
-    # 先後の別は駒の向きでしか描いていないので、読み上げには言葉で入れる
+    # Nothing but orientation says whose piece it is, so the alt text says it
     side = SIDE_NAME[side_of(cell)].lower()
     word = WORD.get(kind.lstrip("+"), "king")
     note = " selected" if selected else (" to move" if to_move else "")
@@ -450,8 +456,8 @@ def render_board(state: dict) -> str:
             elif not over and not state["pending"] and cell and side_of(cell) == turn:
                 href = issue_url(f"sel {sq}")
             else:
-                # 自前でリンクを張らないと GitHub が画像を raw SVG へのリンクで
-                # 包む。空きマスを押した visitor が .svg を開く羽目になる。
+                # Without a link of our own, GitHub wraps the image in one to the
+                # raw SVG, and a visitor clicking an empty square opens a .svg.
                 href = f"https://github.com/{REPO}#shogi"
             cells.append(f'<td><a href="{href}">{inner}</a></td>')
         rows.append(f"<tr><th>{RANKS[r]}</th>{''.join(cells)}</tr>")
@@ -528,7 +534,7 @@ def render(state: dict) -> str:
         call = (f"Red circles are where {where}"
                 f' · <a href="{issue_url("cancel")}">Pick something else</a>')
     else:
-        # 詰まない局面で盤が止まらないよう投了を置く
+        # Resignation, so a game that never reaches mate cannot stall the board
         call = (
             "Click a piece, then a square. Takes about 30 seconds."
             f' · <a href="{issue_url("resign")}">Resign</a>'
@@ -541,7 +547,7 @@ def render(state: dict) -> str:
         lines.append(f'<p align="center">Last move: {state["last"]}</p>')
         lines.append("")
 
-    # 通算成績は対局をまたいで残す。1 局終わるたびに消えると記録にならない。
+    # The tally is kept across games. Cleared after each one, it records nothing.
     record = state.get("record", {SENTE: 0, GOTE: 0})
     games = state.get("games", 0)
     played = len(state.get("players", []))
@@ -564,7 +570,7 @@ def write_readme(state: dict) -> None:
 
 
 # --------------------------------------------------------------------------
-# 1 手進める
+# Playing a move
 # --------------------------------------------------------------------------
 
 def describe(kind: str, to, promote: bool, dropped: bool, captured: bool) -> str:
@@ -579,7 +585,7 @@ def record_move(state: dict, notation: str) -> str:
 
 
 def append_log(state: dict) -> None:
-    """終わった一局をリポジトリのログに書き足す。"""
+    """Append a finished game to the log kept in the repo."""
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     number = state.get("games", 0)
     moves = state.get("moves", [])
@@ -618,7 +624,7 @@ def finish_turn(state: dict, note: str) -> str:
     state["selected"] = None
     state["pending"] = None
 
-    # 将棋にステイルメイトは無い。指す手が無い側がそのまま負け。
+    # Shogi has no stalemate. A side with no move simply loses.
     if not has_any_legal_move(state, other):
         reason = "Checkmate" if in_check(state["board"], other) else "Stalemate"
         record_win(state, GOTE if other == SENTE else SENTE, reason)
@@ -692,7 +698,7 @@ def play(state: dict, command: str, user: str) -> str:
         if not selected:
             return "Pick a piece first."
         arg = parts[1]
-        # 盤が動いたあとの古いリンクを、今選ばれている駒に適用しない
+        # Never apply a link drawn before the board moved to whatever is selected now
         if arg[:-2] != selected:
             return "The board moved on since that link was drawn. Click again."
 
@@ -769,8 +775,8 @@ def main() -> None:
 
     command = parse(title)
     if command is None:
-        # exit 1 にすると heredoc が閉じず、ワークフローが赤くなって
-        # issue も閉じられない。読めない指し手はただの返事で済ませる。
+        # exit 1 leaves the heredoc open, turns the workflow red and stops the
+        # issue being closed. An unreadable move gets nothing but an answer.
         print("That is not a move I can read. Click a piece on the board instead.")
         return
 
@@ -778,7 +784,7 @@ def main() -> None:
     before = json.dumps(state["board"], ensure_ascii=False)
     message = play(state, command, user)
 
-    # 盤が動いたときだけ「指した人」に数える。弾かれたクリックは数えない。
+    # Count a player only when the board actually moved, never on a rejected click.
     moved = json.dumps(state["board"], ensure_ascii=False) != before
     if moved and user not in state["players"]:
         state["players"].append(user)
