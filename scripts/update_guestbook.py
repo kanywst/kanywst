@@ -2,11 +2,13 @@
 """
 update_guestbook.py
 
-GitHub Actions から呼び出され、Issue の内容を README.md のゲストブックセクションに追記する。
-環境変数:
-  ISSUE_BODY   - Issue 本文 (GitHub フォームの YAML 形式)
-  ISSUE_USER   - Issue 作成者のユーザー名
-  ISSUE_NUMBER - Issue 番号
+Called from GitHub Actions. Appends the contents of an issue to the guest book
+section of README.md.
+
+Environment:
+  ISSUE_BODY   - issue body (GitHub's YAML form)
+  ISSUE_USER   - who opened it
+  ISSUE_NUMBER - issue number
 """
 
 import os
@@ -15,32 +17,31 @@ import html
 from datetime import datetime, timezone
 
 README_PATH = "README.md"
-MAX_ENTRIES = 20  # 表示する最大メッセージ数
+MAX_ENTRIES = 20  # How many messages are shown.
 
 START_MARKER = "<!-- GUESTBOOK:START -->"
 END_MARKER = "<!-- GUESTBOOK:END -->"
 
 
 def parse_message(body: str) -> str:
-    """GitHub Issue フォームの本文からメッセージを抽出する。"""
-    # YAML form: "### 💬 Your message\n\nHello!" の形式
+    """Pull the message out of a GitHub issue form body."""
+    # YAML form: "### 💬 Your message\n\nHello!"
     match = re.search(
         r"###.*?Your message.*?\n+(.+?)(?:\n###|\Z)", body, re.DOTALL | re.IGNORECASE
     )
     if match:
         msg = match.group(1).strip()
     else:
-        # フォールバック: 本文全体の最初の非空行
+        # Fall back to the first non-empty line of the whole body
         lines = [l.strip() for l in body.splitlines() if l.strip() and not l.startswith("#")]
         msg = lines[0] if lines else "(no message)"
-    # テーブル内で問題になる文字をエスケープ。
-    # str.splitlines() は \n だけでなく \r や U+2028 U+2029 でも行を割るので、
-    # あとで既存行を読み直すときに 1 行が途中で切れてテーブルが壊れる。
-    # エスケープ表記で書くのは、その文字をソースに生で置くと、このファイル自体を
-    # 行単位で読む道具が同じ壊れ方をするため。
+    # Escape what would break the table. str.splitlines() splits on \r, U+2028
+    # and U+2029 as well as \n, so a row read back later would be cut in half
+    # and take the table with it. These are written as escapes because putting
+    # the characters in the source breaks anything reading this file by line.
     msg = re.sub(r"[\r\n\v\f\x1c-\x1e\x85\u2028\u2029]+", " ", msg)
     msg = msg.replace("|", "\\|")
-    return msg[:200]  # 最大200文字
+    return msg[:200]
 
 
 def build_row(user: str, message: str, ts: str, issue_number: str) -> str:
@@ -52,17 +53,17 @@ def build_row(user: str, message: str, ts: str, issue_number: str) -> str:
 
 
 def parse_existing_rows(block: str) -> list[str]:
-    """マーカー間のブロックからデータ行だけを抽出する。"""
+    """Pull only the data rows out of the block between the markers."""
     rows = []
     for line in block.splitlines():
-        # データ行: <tr><td><code> で始まる行（タイムスタンプ付き）
+        # A data row starts with <tr><td><code>, the timestamp cell
         if "<tr><td><code>" in line:
             rows.append(line)
     return rows
 
 
 def build_table(rows: list[str]) -> str:
-    """行リストから整形済みテーブルブロックを生成する。"""
+    """Build the formatted table block from a list of rows."""
     header = """<table align="center">
   <thead>
     <tr>
@@ -92,19 +93,19 @@ def update_readme(new_row: str, issue_number: str) -> None:
     match = pattern.search(content)
     existing_rows = parse_existing_rows(match.group(0)) if match else []
 
-    # git push は commit が受理されたあとに失敗を返すことがある。ワークフローが
-    # 再試行すると同じ Issue をもう一度書き足してしまうので、Issue 番号で
-    # 上書きする。二重登録より、同じ行を書き直す方が安全。
+    # git push can report failure after the commit has already been taken. On
+    # retry the workflow would add the same issue twice, so the row is replaced
+    # by issue number. Rewriting a row beats entering it twice.
     marker = f"/issues/{issue_number}\""
     existing_rows = [row for row in existing_rows if marker not in row]
 
-    # 新しいエントリを先頭に追加し、最大件数にクリップ
+    # Newest entry first, then clip to the maximum
     all_rows = [new_row] + existing_rows
     all_rows = all_rows[:MAX_ENTRIES]
 
     new_block = f"{START_MARKER}\n{build_table(all_rows)}\n{END_MARKER}"
-    # lambda で包まないと、訪問者の書いた \1 や \g が置換テンプレートとして
-    # 解釈されて re.PatternError で落ちる。
+    # Without the lambda, a \1 or \g written by a visitor is read as a
+    # replacement template and the script dies with re.PatternError.
     updated = pattern.sub(lambda _: new_block, content)
 
     with open(README_PATH, "w", encoding="utf-8") as f:
