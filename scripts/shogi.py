@@ -495,6 +495,7 @@ def render_hand(state: dict, side: str) -> str:
         # The same piece as on the board, so a hand needs no label: its colour
         # says whose it is and the side of the board it sits on says it again.
         image = koma_img(side + piece, "", in_hand=True,
+                         selected=(state["selected"] == f"*{piece}"),
                          waiting=(playing and not its_move), to_move=its_move)
         if selectable:
             image = f'<a href="{issue_url(f"sel *{piece}")}">{image}</a>'
