@@ -14,9 +14,10 @@ The same 28 are written again as "selected" variants with a red frame. GitHub st
 style attributes from README HTML, so a square cannot be highlighted with CSS.
 Swapping the image is the only way to show which piece is selected.
 
-It also draws the two name plates that sit above and below the board. The plate
-of the side to move is inked dark, the waiting one is left pale, so whose turn it
-is reads from across the page and from the side of the board it belongs to.
+Every piece is written a third time in a drained palette, for the side that is
+not to move. Which side is which, and which of them moves next, then reads off
+the board itself without a word of English on it, and the pieces that carry
+their colour are exactly the ones worth clicking.
 
 Promoted pieces are inked in red, as they are on a real board.
 """
@@ -38,13 +39,12 @@ CELL = "#f7efdc"
 SELECTED_CELL = "#fbe0d5"
 MARKER = "#c1121f"
 
-# The name plates. Ink and paper rather than a second accent colour: the red is
-# already spoken for by selection and move markers.
-PLATE_W, PLATE_H = W * 9, 40
-PLATE_INKED = "#5a4632"
-PLATE_INKED_EDGE = "#3f3226"
-PLATE_PAPER_EDGE = "#c9b48d"
-PLATE_PAPER_INK = "#8a7660"
+# The waiting side. The same piece with the warmth taken out of it, dark enough
+# against the square to stay a piece rather than an empty space.
+IDLE_FACE = "#e2dbcd"
+IDLE_EDGE = "#a99f8d"
+IDLE_INK = "#6f6a62"
+IDLE_PROMOTED_INK = "#a37f79"
 
 # CJK fonts are named differently on every platform, so the likely ones are
 # listed in order and fall back to generic serif. An SVG loaded through <img>
@@ -71,8 +71,14 @@ PIECES = {
 }
 
 
-def svg(label: str, promoted: bool, gote: bool, selected: bool = False) -> str:
-    ink = PROMOTED_INK if promoted else INK
+def svg(label: str, promoted: bool, gote: bool, selected: bool = False,
+        idle: bool = False) -> str:
+    koma_face = IDLE_FACE if idle else FACE
+    koma_edge = IDLE_EDGE if idle else EDGE
+    if idle:
+        ink = IDLE_PROMOTED_INK if promoted else IDLE_INK
+    else:
+        ink = PROMOTED_INK if promoted else INK
     # White sits across the board, so the piece is turned with it.
     rotate = f' transform="rotate(180 {W / 2} {H / 2})"' if gote else ""
     # The selected square is framed in the same red as the move markers, so that
@@ -84,27 +90,9 @@ def svg(label: str, promoted: bool, gote: bool, selected: bool = False) -> str:
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="{aria}">
   <rect x="0.75" y="0.75" width="{W - 1.5}" height="{H - 1.5}" fill="{face}" stroke="{EDGE}" stroke-width="1.5"/>
   <g{rotate}>
-    <polygon points="{POINTS}" fill="{FACE}" stroke="{EDGE}" stroke-width="1.5" stroke-linejoin="round"/>
+    <polygon points="{POINTS}" fill="{koma_face}" stroke="{koma_edge}" stroke-width="1.5" stroke-linejoin="round"/>
     <text x="{W / 2}" y="34" font-family="{FONT}" font-size="24" fill="{ink}" text-anchor="middle">{label}</text>
   </g>{frame}
-</svg>
-"""
-
-
-def plate(side: str, state: str) -> str:
-    """A name plate, as wide as the board. state is idle, turn or win."""
-    mark = "▲" if side == "s" else "△"
-    name = "BLACK" if side == "s" else "WHITE"
-    label = {"idle": f"{mark} {name}",
-             "turn": f"{mark} {name} · to move",
-             "win": f"{mark} {name} · wins"}[state]
-    inked = state != "idle"
-    face = PLATE_INKED if inked else CELL
-    edge = PLATE_INKED_EDGE if inked else PLATE_PAPER_EDGE
-    ink = CELL if inked else PLATE_PAPER_INK
-    return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {PLATE_W} {PLATE_H}" width="{PLATE_W}" height="{PLATE_H}" role="img" aria-label="{label}">
-  <rect x="0.75" y="0.75" width="{PLATE_W - 1.5}" height="{PLATE_H - 1.5}" fill="{face}" stroke="{edge}" stroke-width="1.5"/>
-  <text x="{PLATE_W / 2}" y="26" font-family="{FONT}" font-size="17" letter-spacing="2" fill="{ink}" text-anchor="middle">{label}</text>
 </svg>
 """
 
@@ -116,15 +104,14 @@ def main() -> None:
         for side, gote in (("s", False), ("g", True)):
             name = piece.replace("+", "p")
             text = "玉" if piece == "K" and gote else label
-            for suffix, selected in (("", False), ("-sel", True)):
+            # A waiting piece is never the selected one, so there is no
+            # -idle-sel to draw.
+            for suffix, selected, idle in (("", False, False),
+                                           ("-sel", True, False),
+                                           ("-idle", False, True)):
                 path = OUT / f"{side}{name}{suffix}.svg"
-                path.write_text(svg(text, promoted, gote, selected), encoding="utf-8")
+                path.write_text(svg(text, promoted, gote, selected, idle), encoding="utf-8")
                 written += 1
-
-    for side in ("s", "g"):
-        for suffix, state in (("", "idle"), ("-turn", "turn"), ("-win", "win")):
-            (OUT / f"plate-{side}{suffix}.svg").write_text(plate(side, state), encoding="utf-8")
-            written += 1
 
     # Empty squares and move targets, each drawing its own border. Left
     # transparent, the grid would take the colour of GitHub's image placeholder.

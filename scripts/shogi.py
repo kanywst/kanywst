@@ -411,24 +411,16 @@ def img(name: str, alt: str) -> str:
     return f'<img src="{ASSET}/{name}.svg" align="top" alt="{alt}">'
 
 
-def koma_img(cell: str, square: str, selected: bool = False) -> str:
+def koma_img(cell: str, square: str, selected: bool = False, idle: bool = False) -> str:
     kind = kind_of(cell)
-    name = side_of(cell) + kind.replace("+", "p") + ("-sel" if selected else "")
-    # Nothing but orientation says whose piece it is, so the alt text says it
+    suffix = "-sel" if selected else ("-idle" if idle else "")
+    name = side_of(cell) + kind.replace("+", "p") + suffix
+    # Colour carries the side and the turn on screen, and nothing carries them
+    # to a reader, so the alt text says both in words.
     side = SIDE_NAME[side_of(cell)].lower()
     word = WORD.get(kind.lstrip("+"), "king")
-    return img(name, f"{square} {side} {word}{' selected' if selected else ''}")
-
-
-def plate_img(state: dict, side: str) -> str:
-    """The name plate for one side, inked when it is that side's move."""
-    if state["status"] != "playing":
-        suffix = "-win" if state["winner"] == side else ""
-    else:
-        suffix = "-turn" if state["turn"] == side else ""
-    mark = "Black" if side == SENTE else "White"
-    note = {"-turn": " to move", "-win": " wins", "": ""}[suffix]
-    return f'<img src="{ASSET}/plate-{side}{suffix}.svg" align="top" alt="{mark}{note}">'
+    note = " selected" if selected else ("" if idle else " to move")
+    return img(name, f"{square} {side} {word}{note}")
 
 
 def render_board(state: dict) -> str:
@@ -452,7 +444,10 @@ def render_board(state: dict) -> str:
             sq = to_sq(r, c)
             target = (r, c) in targets
             if cell:
-                inner = koma_img(cell, sq, selected=(sq == selected))
+                # Only the side to move keeps its colour, which is also exactly
+                # the set of pieces worth clicking.
+                idle = not over and side_of(cell) != turn
+                inner = koma_img(cell, sq, selected=(sq == selected), idle=idle)
             else:
                 inner = img("target" if target else "empty",
                             f"{sq} legal move" if target else "")
@@ -504,10 +499,9 @@ def render(state: dict) -> str:
     status = state["status"]
     lines = []
 
-    # Only what the plates do not already say. Naming the side to move is their
-    # job, and repeating it above the board is what made this hard to read.
+    # Only what the board cannot show. Whose move it is, it can.
     if status != "playing":
-        headline = f"{state.get('reason', 'Checkmate')}."
+        headline = f"{state.get('reason', 'Checkmate')}. {SIDE_NAME[state['winner']]} wins."
     elif state["pending"]:
         # The piece has not moved yet, so name both squares. "Promote?" alone
         # does not say what is being promoted.
@@ -527,20 +521,18 @@ def render(state: dict) -> str:
         lines.append(f'<p align="center">{headline}</p>')
         lines.append("")
 
-    # White plays from the top of the board and Black from the bottom, so each
-    # plate sits on the side of the board it belongs to.
+    # White plays from the top of the board and Black from the bottom, so a hand
+    # sits on the side of the board it belongs to and needs no label.
     def centred(html: str) -> None:
         lines.append(f'<p align="center">{html}</p>')
         lines.append("")
 
-    centred(plate_img(state, GOTE))
     if render_hand(state, GOTE):
         centred(render_hand(state, GOTE))
     lines.append(render_board(state))
     lines.append("")
     if render_hand(state, SENTE):
         centred(render_hand(state, SENTE))
-    centred(plate_img(state, SENTE))
 
     if status != "playing":
         call = f'<a href="{issue_url("new")}">Start a new game</a>'
