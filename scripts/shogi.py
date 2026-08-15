@@ -468,11 +468,13 @@ def render_board(state: dict) -> str:
             cells.append(f'<a href="{href}">{inner}</a>')
         rows.append("".join(cells))
 
-    # A table cannot be the board: GitHub pads and borders every cell, and the
-    # squares read as a spreadsheet. Ranks are one long line each instead, broken
-    # with <br>. The newline after each break is collapsed away by the browser,
-    # so the ranks meet with no seam.
-    return '<p align="center">\n' + "<br>\n".join(rows) + "\n</p>"
+    # A table cannot be the board: GitHub pads and borders every cell, so the
+    # squares read as a spreadsheet. One rank per line inside a pre instead.
+    # pre is the only element whose white-space: pre survives GitHub's stripping
+    # of style, and without it a rank wraps on a phone and the board falls apart.
+    # It brings overflow: auto with it, so a narrow screen scrolls the board
+    # sideways rather than breaking it.
+    return '<div align="center"><pre>' + "\n".join(rows) + "</pre></div>"
 
 
 def render_hand(state: dict, side: str) -> str:
