@@ -402,13 +402,15 @@ def img(name: str, alt: str) -> str:
     return f'<img src="{ASSET}/{name}.svg" width="44" height="48" alt="{alt}">'
 
 
-def koma_img(cell: str, square: str, selected: bool = False) -> str:
+def koma_img(cell: str, square: str, selected: bool = False, to_move: bool = False) -> str:
     kind = kind_of(cell)
-    name = side_of(cell) + kind.replace("+", "p") + ("-sel" if selected else "")
+    suffix = "-sel" if selected else ("-turn" if to_move else "")
+    name = side_of(cell) + kind.replace("+", "p") + suffix
     # 先後の別は駒の向きでしか描いていないので、読み上げには言葉で入れる
     side = SIDE_NAME[side_of(cell)].lower()
     word = WORD.get(kind.lstrip("+"), "king")
-    return img(name, f"{square} {side} {word}{' selected' if selected else ''}")
+    note = " selected" if selected else (" to move" if to_move else "")
+    return img(name, f"{square} {side} {word}{note}")
 
 
 def render_board(state: dict) -> str:
@@ -434,7 +436,11 @@ def render_board(state: dict) -> str:
             sq = to_sq(r, c)
             target = (r, c) in targets
             if cell:
-                inner = koma_img(cell, sq, selected=(sq == selected))
+                # The king of the side to move is framed, so whose turn it is
+                # reads from the board itself and not from one line above it.
+                to_move = (not over and kind_of(cell) == "K"
+                           and side_of(cell) == turn)
+                inner = koma_img(cell, sq, selected=(sq == selected), to_move=to_move)
             else:
                 inner = img("target" if target else "empty",
                             f"{sq} legal move" if target else "")
@@ -495,7 +501,7 @@ def render(state: dict) -> str:
                         " Click a red circle to move it there.")
     else:
         check = "Check. " if in_check(state["board"], turn) else ""
-        headline = f"{check}{SIDE_NAME[turn]} to move."
+        headline = f"{check}{SIDE_NAME[turn]} to move — the king in the blue frame."
 
     lines.append(f'<p align="center">{headline}</p>')
     lines.append("")

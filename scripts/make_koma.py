@@ -13,6 +13,10 @@ The same 28 are written again as "selected" variants with a red frame. GitHub st
 style attributes from README HTML, so a square cannot be highlighted with CSS.
 Swapping the image is the only way to show which piece is selected.
 
+Both kings are written a third time as "-turn" variants, framed in a pulsing blue.
+A single line of text above the board is easy to miss; SMIL inside an SVG animates
+even through <img>, the same trick as the blinking wordmark cursor.
+
 成駒の字を朱にするのは実際の駒と同じ。
 """
 
@@ -32,6 +36,9 @@ EDGE = "#8b6f47"
 CELL = "#f7efdc"
 SELECTED_CELL = "#fbe0d5"
 MARKER = "#c1121f"
+# Not the marker red: a turn frame in that colour reads as "selected".
+TURN_CELL = "#e4eefa"
+TURN_MARKER = "#0f5ba8"
 
 # CJK フォントは環境ごとに名前が違うので、実在しそうなものを順に並べて
 # 最後に総称 serif へ落とす。<img> で読み込まれた SVG は閲覧者側の
@@ -58,16 +65,28 @@ PIECES = {
 }
 
 
-def svg(label: str, promoted: bool, gote: bool, selected: bool = False) -> str:
+def svg(label: str, promoted: bool, gote: bool, selected: bool = False,
+        turn: bool = False) -> str:
     ink = PROMOTED_INK if promoted else INK
     # 後手の駒は盤ごと 180 度回して置くので、駒も回す
     rotate = f' transform="rotate(180 {W / 2} {H / 2})"' if gote else ""
-    # Frame the selected square in the same red as the move markers, so that
-    # "this piece goes to those circles" reads at a glance.
-    face = SELECTED_CELL if selected else CELL
-    frame = (f'\n  <rect x="2.25" y="2.25" width="{W - 4.5}" height="{H - 4.5}" fill="none"'
-             f' stroke="{MARKER}" stroke-width="3"/>' if selected else "")
-    aria = f"{label} selected" if selected else label
+    face = SELECTED_CELL if selected else (TURN_CELL if turn else CELL)
+    frame = ""
+    aria = label
+    if selected:
+        # The same red as the move markers, so that "this piece goes to those
+        # circles" reads at a glance.
+        frame = (f'\n  <rect x="2.25" y="2.25" width="{W - 4.5}" height="{H - 4.5}" fill="none"'
+                 f' stroke="{MARKER}" stroke-width="3"/>')
+        aria = f"{label} selected"
+    elif turn:
+        # A still frame gets lost in the grid; the pulse is what catches the eye.
+        frame = (f'\n  <rect x="2.25" y="2.25" width="{W - 4.5}" height="{H - 4.5}" fill="none"'
+                 f' stroke="{TURN_MARKER}" stroke-width="3">'
+                 f'\n    <animate attributeName="opacity" values="1;0.25;1"'
+                 f' dur="2.4s" repeatCount="indefinite"/>'
+                 f'\n  </rect>')
+        aria = f"{label} to move"
     return f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" role="img" aria-label="{aria}">
   <rect x="0.75" y="0.75" width="{W - 1.5}" height="{H - 1.5}" fill="{face}" stroke="{EDGE}" stroke-width="1.5"/>
   <g{rotate}>
@@ -85,9 +104,12 @@ def main() -> None:
         for side, gote in (("s", False), ("g", True)):
             name = piece.replace("+", "p")
             text = "玉" if piece == "K" and gote else label
-            for suffix, selected in (("", False), ("-sel", True)):
+            variants = [("", False, False), ("-sel", True, False)]
+            if piece == "K":
+                variants.append(("-turn", False, True))
+            for suffix, selected, turn in variants:
                 path = OUT / f"{side}{name}{suffix}.svg"
-                path.write_text(svg(text, promoted, gote, selected), encoding="utf-8")
+                path.write_text(svg(text, promoted, gote, selected, turn), encoding="utf-8")
                 written += 1
 
     # 空マスと移動先。盤の枠は自分で描く。透明にしておくと、盤の格子が
