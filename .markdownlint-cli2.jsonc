@@ -8,7 +8,7 @@
     "MD036": false,
     "MD041": false,
     "MD060": false,
-    // Three kinds of raw HTML live in README.md, and nothing else does:
+    // Four kinds of raw HTML live in README.md, and nothing else does:
     //   - picture/source/img for the theme-aware wordmark, and p to centre it
     //   - a/img/pre/div for the shogi board between the SHOGI:START/END markers,
     //     written by .github/workflows/shogi.yml via scripts/shogi.py. One rank
