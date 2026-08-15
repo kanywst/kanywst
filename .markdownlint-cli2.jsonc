@@ -10,6 +10,10 @@
     "MD060": false,
     // Three kinds of raw HTML live in README.md, and nothing else does:
     //   - picture/source/img for the theme-aware wordmark, and p to centre it
+    //   - a/img/br for the shogi board between the SHOGI:START/END markers,
+    //     written by .github/workflows/shogi.yml via scripts/shogi.py. One rank
+    //     per line, broken with br: a table puts padding and a border around
+    //     every square, which no attribute can turn off
     //   - table/tr/td for the three-column layout the profile READMEs that
     //     actually work (simonw, tw93) all converge on, since markdown has no
     //     column primitive
@@ -22,6 +26,7 @@
         "picture",
         "source",
         "img",
+        "br",
         "p",
         "h2",
         "table",

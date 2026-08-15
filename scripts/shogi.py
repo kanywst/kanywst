@@ -404,19 +404,31 @@ def issue_url(command: str) -> str:
 
 
 def img(name: str, alt: str) -> str:
-    # Inside an HTML table markdown's ![]() does not expand, so write img.
-    return f'<img src="{ASSET}/{name}.svg" width="44" height="48" alt="{alt}">'
+    # No width or height: GitHub gives any sized image a 6px border radius and a
+    # background of its own, which turns a board into a grid of rounded tiles.
+    # align=top is what closes the gap a baseline would otherwise leave between
+    # ranks. Written as img because markdown's ![]() does not expand in raw HTML.
+    return f'<img src="{ASSET}/{name}.svg" align="top" alt="{alt}">'
 
 
-def koma_img(cell: str, square: str, selected: bool = False, to_move: bool = False) -> str:
+def koma_img(cell: str, square: str, selected: bool = False) -> str:
     kind = kind_of(cell)
-    suffix = "-sel" if selected else ("-turn" if to_move else "")
-    name = side_of(cell) + kind.replace("+", "p") + suffix
+    name = side_of(cell) + kind.replace("+", "p") + ("-sel" if selected else "")
     # Nothing but orientation says whose piece it is, so the alt text says it
     side = SIDE_NAME[side_of(cell)].lower()
     word = WORD.get(kind.lstrip("+"), "king")
-    note = " selected" if selected else (" to move" if to_move else "")
-    return img(name, f"{square} {side} {word}{note}")
+    return img(name, f"{square} {side} {word}{' selected' if selected else ''}")
+
+
+def plate_img(state: dict, side: str) -> str:
+    """The name plate for one side, inked when it is that side's move."""
+    if state["status"] != "playing":
+        suffix = "-win" if state["winner"] == side else ""
+    else:
+        suffix = "-turn" if state["turn"] == side else ""
+    mark = "Black" if side == SENTE else "White"
+    note = {"-turn": " to move", "-win": " wins", "": ""}[suffix]
+    return f'<img src="{ASSET}/plate-{side}{suffix}.svg" align="top" alt="{mark}{note}">'
 
 
 def render_board(state: dict) -> str:
@@ -432,9 +444,7 @@ def render_board(state: dict) -> str:
         else:
             targets = set(legal_moves_from(state, from_sq(selected)))
 
-    head = "".join(f"<th>{N - c}</th>" for c in range(N))
-    rows = [f"<tr><th></th>{head}</tr>"]
-
+    rows = []
     for r in range(N):
         cells = []
         for c in range(N):
@@ -442,11 +452,7 @@ def render_board(state: dict) -> str:
             sq = to_sq(r, c)
             target = (r, c) in targets
             if cell:
-                # The king of the side to move is framed, so whose turn it is
-                # reads from the board itself and not from one line above it.
-                to_move = (not over and kind_of(cell) == "K"
-                           and side_of(cell) == turn)
-                inner = koma_img(cell, sq, selected=(sq == selected), to_move=to_move)
+                inner = koma_img(cell, sq, selected=(sq == selected))
             else:
                 inner = img("target" if target else "empty",
                             f"{sq} legal move" if target else "")
@@ -459,17 +465,22 @@ def render_board(state: dict) -> str:
                 # Without a link of our own, GitHub wraps the image in one to the
                 # raw SVG, and a visitor clicking an empty square opens a .svg.
                 href = f"https://github.com/{REPO}#shogi"
-            cells.append(f'<td><a href="{href}">{inner}</a></td>')
-        rows.append(f"<tr><th>{RANKS[r]}</th>{''.join(cells)}</tr>")
+            cells.append(f'<a href="{href}">{inner}</a>')
+        rows.append("".join(cells))
 
-    return '<table align="center">\n' + "\n".join(rows) + "\n</table>"
+    # A table cannot be the board: GitHub pads and borders every cell, and the
+    # squares read as a spreadsheet. Ranks are one long line each instead, broken
+    # with <br>. The newline after each break is collapsed away by the browser,
+    # so the ranks meet with no seam.
+    return '<p align="center">\n' + "<br>\n".join(rows) + "\n</p>"
 
 
 def render_hand(state: dict, side: str) -> str:
     hand = state["hands"].get(side, {})
     held = [(p, n) for p in HAND_ORDER for n in [hand.get(p, 0)] if n > 0]
+    # An empty hand is worth no line at all. The plate below it names the side.
     if not held:
-        return f"{SIDE_NAME[side]} in hand: none"
+        return ""
 
     selectable = (
         side == state["turn"]
@@ -483,7 +494,7 @@ def render_hand(state: dict, side: str) -> str:
             parts.append(f'<a href="{issue_url(f"sel *{piece}")}">{label}</a>')
         else:
             parts.append(label)
-    return f"{SIDE_NAME[side]} in hand: " + " ".join(parts)
+    return "In hand: " + " ".join(parts)
 
 
 def render(state: dict) -> str:
@@ -491,8 +502,10 @@ def render(state: dict) -> str:
     status = state["status"]
     lines = []
 
+    # Only what the plates do not already say. Naming the side to move is their
+    # job, and repeating it above the board is what made this hard to read.
     if status != "playing":
-        headline = f"{state.get('reason', 'Checkmate')}. {SIDE_NAME[state['winner']]} wins."
+        headline = f"{state.get('reason', 'Checkmate')}."
     elif state["pending"]:
         # The piece has not moved yet, so name both squares. "Promote?" alone
         # does not say what is being promoted.
@@ -506,17 +519,26 @@ def render(state: dict) -> str:
             headline = (f"The piece in the red frame on {state['selected']} is selected."
                         " Click a red circle to move it there.")
     else:
-        check = "Check. " if in_check(state["board"], turn) else ""
-        headline = f"{check}{SIDE_NAME[turn]} to move — the king in the blue frame."
+        headline = "Check." if in_check(state["board"], turn) else ""
 
-    lines.append(f'<p align="center">{headline}</p>')
-    lines.append("")
-    lines.append(f'<p align="center">{render_hand(state, GOTE)}</p>')
-    lines.append("")
+    if headline:
+        lines.append(f'<p align="center">{headline}</p>')
+        lines.append("")
+
+    # White plays from the top of the board and Black from the bottom, so each
+    # plate sits on the side of the board it belongs to.
+    def centred(html: str) -> None:
+        lines.append(f'<p align="center">{html}</p>')
+        lines.append("")
+
+    centred(plate_img(state, GOTE))
+    if render_hand(state, GOTE):
+        centred(render_hand(state, GOTE))
     lines.append(render_board(state))
     lines.append("")
-    lines.append(f'<p align="center">{render_hand(state, SENTE)}</p>')
-    lines.append("")
+    if render_hand(state, SENTE):
+        centred(render_hand(state, SENTE))
+    centred(plate_img(state, SENTE))
 
     if status != "playing":
         call = f'<a href="{issue_url("new")}">Start a new game</a>'
@@ -543,18 +565,15 @@ def render(state: dict) -> str:
     lines.append(f'<p align="center">{call}</p>')
     lines.append("")
 
-    if state["last"]:
-        lines.append(f'<p align="center">Last move: {state["last"]}</p>')
-        lines.append("")
-
     # The tally is kept across games. Cleared after each one, it records nothing.
     record = state.get("record", {SENTE: 0, GOTE: 0})
     games = state.get("games", 0)
     played = len(state.get("players", []))
-    lines.append(
-        f'<p align="center">Black {record.get(SENTE, 0)} · White {record.get(GOTE, 0)}'
-        f' · {games} games · {played} players</p>'
-    )
+    footer = [f"Last move: {state['last']}"] if state["last"] else []
+    footer.append(f"Black {record.get(SENTE, 0)} · White {record.get(GOTE, 0)}")
+    footer.append(f"{games} game{'' if games == 1 else 's'}")
+    footer.append(f"{played} player{'' if played == 1 else 's'}")
+    lines.append(f'<p align="center">{" · ".join(footer)}</p>')
     return "\n".join(lines)
 
 
