@@ -69,7 +69,7 @@
   [
    "sP",
    "sP",
-   "",
+   "sN",
    "sP",
    "sP",
    "sP",
@@ -90,7 +90,7 @@
   ],
   [
    "sL",
-   "sN",
+   "",
    "sS",
    "sG",
    "sK",
@@ -104,16 +104,17 @@
   "s": {},
   "g": {}
  },
- "turn": "s",
- "selected": "8i",
+ "turn": "g",
+ "selected": null,
  "pending": null,
  "status": "playing",
  "winner": null,
  "reason": null,
- "last": "P-8d",
+ "last": "N-7g",
  "moves": [
   "P-7f",
-  "P-8d"
+  "P-8d",
+  "N-7g"
  ],
  "games": 0,
  "record": {
