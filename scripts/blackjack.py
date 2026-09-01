@@ -341,10 +341,14 @@ def coach(state: dict, action: str) -> tuple[str, float]:
     best = max(priced.items(), key=lambda kv: kv[1])
     cost = priced[action] - best[1]
 
-    lines = []
+    # Fenced, because the comment this ends up in is markdown and two spaces
+    # of indent are not a code block: the rows would run into one paragraph and
+    # the numbers would stop lining up.
+    lines = ["```text"]
     for name, value in sorted(priced.items(), key=lambda kv: -kv[1]):
         mark = "  best" if name == best[0] else ("  <- you" if name == action else "")
-        lines.append(f"  {name.title():<10}{value:+.4f}{mark}")
+        lines.append(f"{name.title():<10}{value:+.4f}{mark}")
+    lines.append("```")
     return "\n".join(lines), cost
 
 
