@@ -29,7 +29,7 @@ def svg_files() -> list[pathlib.Path]:
 class Art(unittest.TestCase):
     def test_every_image_the_table_can_name_exists(self):
         expected = {f"{rank}{suit}" for rank in make_cards.RANKS for suit in make_cards.SUITS}
-        expected |= {"back", "slot", "caret", "spacer"}
+        expected |= {"back", "slot", "blank", "caret", "spacer"}
         expected |= {f"chip{value}" for value in make_cards.CHIPS}
         expected |= {f"btn-{label}" for label in make_cards.BUTTONS}
         self.assertEqual({p.stem for p in svg_files()}, expected)
@@ -61,7 +61,7 @@ class Art(unittest.TestCase):
         heights = set()
         for path in svg_files():
             root = ET.parse(path).getroot()
-            if path.stem in ("caret", "spacer") or len(path.stem) == 2:
+            if path.stem in ("caret", "spacer", "blank", "back", "slot") or len(path.stem) == 2:
                 heights.add(root.get("height"))
         self.assertEqual(heights, {str(make_cards.H)})
 
@@ -84,16 +84,17 @@ class Art(unittest.TestCase):
             with self.subTest(suit):
                 self.assertIn(">10<", text)
 
-    def test_everything_but_the_spacer_says_what_it_is(self):
+    def test_everything_that_is_not_padding_says_what_it_is(self):
         # The table is images all the way down, so the alt text a reader hears
         # comes from the renderer, but a bare aria-label keeps the file honest
-        # when it is opened on its own.
+        # when it is opened on its own. The two that pad a row out are felt and
+        # nothing else, and have nothing to say.
         for path in svg_files():
             root = ET.parse(path).getroot()
             with self.subTest(path.name):
                 self.assertEqual(root.get("role"), "img")
                 label = root.get("aria-label")
-                if path.stem == "spacer":
+                if path.stem in ("spacer", "blank"):
                     self.assertEqual(label, "")
                 else:
                     self.assertTrue(label)

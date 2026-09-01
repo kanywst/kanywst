@@ -73,7 +73,7 @@ CHIPS = {
     25: ("#2e7d4f", "#1f5a38", "#f4faf6"),
 }
 
-BUTTONS = ["hit", "stand", "double", "split", "surrender", "insure", "no", "deal"]
+BUTTONS = ["hit", "stand", "double", "split", "surrender", "insure", "no"]
 BUTTON_H = 30
 
 
@@ -135,6 +135,12 @@ def back() -> str:
           f' fill="none" stroke="{FACE}" stroke-width="2"/>'
         + "\n</svg>\n"
     )
+
+
+def blank() -> str:
+    """Felt and nothing else, to pad a short row out to the width of the
+    longest one. Rows are centred, so without it a split hand staggers."""
+    return head(W, H, "") + felt(W, H) + "\n</svg>\n"
 
 
 def slot() -> str:
@@ -214,6 +220,7 @@ def main() -> None:
 
     write("back", back())
     write("slot", slot())
+    write("blank", blank())
 
     for value in CHIPS:
         write(f"chip{value}", chip(value))

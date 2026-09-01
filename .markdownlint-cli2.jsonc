@@ -8,17 +8,25 @@
     "MD036": false,
     "MD041": false,
     "MD060": false,
-    // Two kinds of raw HTML live in README.md, and nothing else does:
+    // Three kinds of raw HTML live in README.md, and nothing else does:
     //   - picture/source/img for the theme-aware wordmark, and p to centre it
-    //   - the guest book table between the GUESTBOOK:START/END markers, written
-    //     by .github/workflows/guestbook.yml via scripts/update_guestbook.py,
-    //     since markdown has no way to centre a table or to say which column is
-    //     which without one
+    //   - a/img/pre/div for the blackjack table between the BLACKJACK:START/END
+    //     markers, written by .github/workflows/blackjack.yml via
+    //     scripts/blackjack.py. The cards sit inside a pre: a table puts padding
+    //     and a border around every cell, which would separate the felt each
+    //     tile paints, and pre is the only element whose white-space survives
+    //     GitHub's stripping of style
+    //   - table/code for the hands played most recently and for the guest book
+    //     between the GUESTBOOK:START/END markers, written by
+    //     .github/workflows/guestbook.yml via scripts/update_guestbook.py,
+    //     since markdown has no way to centre a table
     "MD033": {
       "allowed_elements": [
         "picture",
         "source",
         "img",
+        "pre",
+        "div",
         "p",
         "h2",
         "table",
