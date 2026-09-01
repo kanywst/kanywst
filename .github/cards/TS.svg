@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 62" width="44" height="62" role="img" aria-label="ten of spades">
+  <rect width="44" height="62" fill="#1c5c43"/>
+  <rect x="2.5" y="2.5" width="39" height="57" rx="4" fill="#fbf9f4" stroke="#d8d2c4"/>
+  <text x="11" y="18" font-family="'Helvetica Neue',Helvetica,Arial,'Liberation Sans',sans-serif" font-size="14" font-weight="700" fill="#1f2328" text-anchor="middle" textLength="13" lengthAdjust="spacingAndGlyphs">10</text>
+  <g transform="translate(6.50 21.50) scale(0.3750)"><path d="M12 2C12 2 3.6 9.2 3.6 14.4a4.6 4.6 0 0 0 7.5 3.6c-.2 1.4-1.2 3.4-2.7 4.8h7.2c-1.5-1.4-2.5-3.4-2.7-4.8a4.6 4.6 0 0 0 7.5-3.6C20.4 9.2 12 2 12 2Z" fill="#1f2328"/></g>
+  <g transform="translate(13.50 29.50) scale(1.0417)"><path d="M12 2C12 2 3.6 9.2 3.6 14.4a4.6 4.6 0 0 0 7.5 3.6c-.2 1.4-1.2 3.4-2.7 4.8h7.2c-1.5-1.4-2.5-3.4-2.7-4.8a4.6 4.6 0 0 0 7.5-3.6C20.4 9.2 12 2 12 2Z" fill="#1f2328"/></g>
+</svg>

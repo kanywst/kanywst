@@ -8,27 +8,17 @@
     "MD036": false,
     "MD041": false,
     "MD060": false,
-    // Four kinds of raw HTML live in README.md, and nothing else does:
+    // Two kinds of raw HTML live in README.md, and nothing else does:
     //   - picture/source/img for the theme-aware wordmark, and p to centre it
-    //   - a/img/pre/div for the shogi board between the SHOGI:START/END markers,
-    //     written by .github/workflows/shogi.yml via scripts/shogi.py. One rank
-    //     per line inside a pre: a table puts padding and a border around every
-    //     square, and pre is the only element whose white-space survives, which
-    //     is what stops a rank from wrapping and breaking the board on a phone
-    //   - table/tr/td for the three-column layout the profile READMEs that
-    //     actually work (simonw, tw93) all converge on, since markdown has no
-    //     column primitive
     //   - the guest book table between the GUESTBOOK:START/END markers, written
-    //     by .github/workflows/guestbook.yml via scripts/update_guestbook.py
-    // Everything the build script writes between its own markers is plain
-    // markdown, so the generated sections stay lintable too.
+    //     by .github/workflows/guestbook.yml via scripts/update_guestbook.py,
+    //     since markdown has no way to centre a table or to say which column is
+    //     which without one
     "MD033": {
       "allowed_elements": [
         "picture",
         "source",
         "img",
-        "pre",
-        "div",
         "p",
         "h2",
         "table",

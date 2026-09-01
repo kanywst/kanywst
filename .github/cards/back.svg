@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 62" width="44" height="62" role="img" aria-label="face down card">
+  <rect width="44" height="62" fill="#1c5c43"/>
+  <clipPath id="card"><rect x="2.5" y="2.5" width="39" height="57" rx="4"/></clipPath>
+  <rect x="2.5" y="2.5" width="39" height="57" rx="4" fill="#8b1f2f"/>
+  <g clip-path="url(#card)" stroke="#6d1724" stroke-width="2.5">
+    <path d="M-8 6 L6 56" />
+    <path d="M-1 6 L13 56" />
+    <path d="M6 6 L20 56" />
+    <path d="M13 6 L27 56" />
+    <path d="M20 6 L34 56" />
+    <path d="M27 6 L41 56" />
+    <path d="M34 6 L48 56" />
+    <path d="M41 6 L55 56" />
+    <path d="M48 6 L62 56" />
+  </g>
+  <rect x="2.5" y="2.5" width="39" height="57" rx="4" fill="none" stroke="#fbf9f4" stroke-width="2"/>
+</svg>
