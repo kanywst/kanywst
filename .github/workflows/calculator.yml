@@ -1,0 +1,45 @@
+name: Calculator
+
+# The two checks that make the numbers on the table worth trusting: all 260
+# cells of the published strategy chart, derived from the calculator with
+# nothing having told it what the chart says, and a Monte Carlo at enough trials
+# to catch a small bias. Together they take about four minutes, which is too
+# long to pay on a pull request that only moved some art.
+#
+# So they run here instead: nightly, on demand, and on any pull request that
+# touches the calculator or the chart it is checked against — which is the only
+# kind of change that can break them.
+
+on:
+  pull_request:
+    paths:
+      - scripts/bjmath.py
+      - tests/test_bjmath.py
+      - tests/data/basic-strategy.txt
+      - .github/workflows/calculator.yml
+  schedule:
+    - cron: "17 4 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: calculator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calculator:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+
+      - name: The chart falls out of the numbers
+        env:
+          BJ_SLOW: "1"
+        run: python -m unittest tests.test_bjmath -v

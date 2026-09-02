@@ -353,6 +353,44 @@ class Shoe(Sandbox):
             self.assertTrue(all(n >= 0 for n in bj.composition(state)))
 
 
+class LogFile(Sandbox):
+    """The log is the only file here that is trimmed rather than rewritten, and
+    the trim runs for the first time about two thousand hands in. Nobody would
+    notice it going wrong until the whole file was already unreadable."""
+
+    def close_shoes(self, count: int) -> str:
+        state = bj.blank_state()
+        for number in range(1, count + 1):
+            state["shoe"] = {"seen": ["TH", "5C", "AS"] * 4, "number": number}
+            bj.log_shoe(state)
+        return bj.LOG_PATH.read_text(encoding="utf-8")
+
+    def test_the_oldest_shoes_fall_off_and_the_rest_stay_readable(self):
+        text = self.close_shoes(bj.MAX_LOG_SHOES + 5)
+        self.assertTrue(text.startswith(bj.header()))
+        kept = [line for line in text.splitlines() if line.startswith("  shoe ")]
+        self.assertEqual(len(kept), bj.MAX_LOG_SHOES)
+        # The ones kept are the newest, in order, and each still has its cards.
+        numbers = [int(line.split()[1]) for line in kept]
+        self.assertEqual(numbers, list(range(6, bj.MAX_LOG_SHOES + 6)))
+        self.assertEqual(text.count("T 5 A T 5 A T 5 A T 5 A"), bj.MAX_LOG_SHOES)
+
+    def test_nothing_is_thrown_away_before_the_limit(self):
+        text = self.close_shoes(bj.MAX_LOG_SHOES)
+        self.assertEqual(text.count("\n  shoe "), bj.MAX_LOG_SHOES)
+
+    def test_the_hands_and_the_shoes_share_the_file_without_confusing_it(self):
+        # A hand line must never look like the start of a shoe to the trim.
+        state = table()
+        with stacked("TD"):
+            bj.play(state, "stand 7", "someone")
+        state["shoe"] = {"seen": ["TH", "5C"], "number": 1}
+        bj.log_shoe(state)
+        text = bj.LOG_PATH.read_text(encoding="utf-8")
+        self.assertEqual(text.count("\n  shoe "), 1)
+        self.assertIn("dealer", text)
+
+
 class Log(unittest.TestCase):
     def test_the_log_in_the_repo_starts_the_way_the_script_writes_it(self):
         # The committed file is a seed, so that the workflow's `git add` always
