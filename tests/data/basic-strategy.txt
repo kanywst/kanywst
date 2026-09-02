@@ -1,0 +1,49 @@
+Basic strategy for the table on the profile: six decks, dealer stands on soft
+17, double after split, late surrender, blackjack pays 3:2.
+
+This file is not used to play. Nothing in scripts/ reads a chart — every action
+is priced from the cards left in the shoe. It is here as a check on that: the
+calculator has to reproduce all 260 cells below from a full shoe, and if it ever
+stops doing so, either it is wrong or a rule changed underneath it.
+
+Columns are the dealer upcard.
+
+  H   hit
+  S   stand
+  D   double, or hit where doubling is not allowed
+  Ds  double, or stand where doubling is not allowed
+  P   split
+  R   surrender, or hit where surrender is not allowed
+
+Hard totals are built without a ten wherever they can be, so hard 16 is 9+7 and
+not 10+6. Two hands with the same total and different cards are not the same
+hand, and the calculator will happily tell you so.
+
+          2   3   4   5   6   7   8   9   T   A
+hard 8    H   H   H   H   H   H   H   H   H   H
+hard 9    H   D   D   D   D   H   H   H   H   H
+hard 10   D   D   D   D   D   D   D   D   H   H
+hard 11   D   D   D   D   D   D   D   D   D   H
+hard 12   H   H   S   S   S   H   H   H   H   H
+hard 13   S   S   S   S   S   H   H   H   H   H
+hard 14   S   S   S   S   S   H   H   H   H   H
+hard 15   S   S   S   S   S   H   H   H   R   H
+hard 16   S   S   S   S   S   H   H   R   R   R
+hard 17   S   S   S   S   S   S   S   S   S   S
+soft 13   H   H   H   D   D   H   H   H   H   H
+soft 14   H   H   H   D   D   H   H   H   H   H
+soft 15   H   H   D   D   D   H   H   H   H   H
+soft 16   H   H   D   D   D   H   H   H   H   H
+soft 17   H   D   D   D   D   H   H   H   H   H
+soft 18   S   Ds  Ds  Ds  Ds  S   S   H   H   H
+soft 19   S   S   S   S   S   S   S   S   S   S
+soft 20   S   S   S   S   S   S   S   S   S   S
+pair 2    P   P   P   P   P   P   H   H   H   H
+pair 3    P   P   P   P   P   P   H   H   H   H
+pair 4    H   H   H   P   P   H   H   H   H   H
+pair 6    P   P   P   P   P   H   H   H   H   H
+pair 7    P   P   P   P   P   P   H   H   H   H
+pair 8    P   P   P   P   P   P   P   P   P   P
+pair 9    P   P   P   P   P   S   P   P   S   S
+pair T    S   S   S   S   S   S   S   S   S   S
+pair A    P   P   P   P   P   P   P   P   P   P
