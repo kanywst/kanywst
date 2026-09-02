@@ -293,6 +293,18 @@ class Clicks(Sandbox):
             with self.subTest(title):
                 self.assertIsNone(bj.parse(title))
 
+    def test_a_hand_that_never_reaches_a_decision_still_counts_its_player(self):
+        # A natural settles from the deal, so nothing on that path goes through
+        # the coach. The ceiling on the public state file has to hold anyway.
+        state = bj.blank_state()
+        state["players"] = {f"p{i}": {"hands": 1, "decisions": 1, "cost": 0.0}
+                            for i in range(bj.MAX_PLAYERS)}
+        with stacked("AS", "7D", "KH", "9C"):
+            bj.play(state, "bet 2 1", "newcomer")
+        self.assertEqual(len(state["players"]), bj.MAX_PLAYERS)
+        self.assertIn("newcomer", state["players"])
+        self.assertEqual(state["players"]["newcomer"]["hands"], 1)
+
     def test_the_coach_charges_nothing_for_the_best_action(self):
         state = table(up="9D", cards=("TH", "6C"))
         with stacked("TD"):

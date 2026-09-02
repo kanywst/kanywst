@@ -348,17 +348,31 @@ def coach(state: dict, action: str) -> tuple[str, float]:
     return "\n".join(lines), cost
 
 
+def player(state: dict, user: str) -> dict:
+    """The record kept for one player, made if it is not there.
+
+    Every path that can add a name goes through here, including the hands that
+    settle without anyone taking a decision — a natural, or a dealer who peeked
+    and had one. Otherwise the ceiling below would only be applied on the paths
+    that happen to reach it, and a public state file would grow past it.
+    """
+    who = state["players"].setdefault(user, {"hands": 0, "decisions": 0, "cost": 0.0})
+    if len(state["players"]) > MAX_PLAYERS:
+        # Only the count is ever shown, and a table played by the whole internet
+        # should not grow a state file without end. The player in front of the
+        # table is never the one dropped.
+        ranked = sorted(((name, stat) for name, stat in state["players"].items()
+                         if name != user), key=lambda kv: -kv[1]["decisions"])
+        state["players"] = dict(ranked[:MAX_PLAYERS - 1] + [(user, who)])
+    return who
+
+
 def record_decision(state: dict, user: str, cost: float) -> None:
     state["coach"]["cost"] += cost
     state["coach"]["decisions"] += 1
-    who = state["players"].setdefault(user, {"hands": 0, "decisions": 0, "cost": 0.0})
+    who = player(state, user)
     who["decisions"] += 1
     who["cost"] += cost
-    if len(state["players"]) > MAX_PLAYERS:
-        # Only the count and the leaders are ever shown, and a table played by
-        # the whole internet should not grow a state file without end.
-        ranked = sorted(state["players"].items(), key=lambda kv: -kv[1]["decisions"])
-        state["players"] = dict(ranked[:MAX_PLAYERS])
 
 
 def deal(state: dict, bet: float, user: str) -> str:
@@ -376,8 +390,7 @@ def deal(state: dict, bet: float, user: str) -> str:
     hand["up"] = draw(state)
     spot["cards"].append(draw(state))
 
-    who = state["players"].setdefault(user, {"hands": 0, "decisions": 0, "cost": 0.0})
-    who["hands"] += 1
+    player(state, user)["hands"] += 1
 
     up = value_of(hand["up"])
     if up == 1:
@@ -1024,8 +1037,11 @@ def main() -> None:
 
     state = load_state()
     message = play(state, command, user)
-    write_readme(state)
+    # The state file first: it is what the next click plays against, and the
+    # table is drawn from it. Written the other way round, a run that dies in
+    # between would leave a profile showing a hand that was never recorded.
     save_state(state)
+    write_readme(state)
     print(message)
 
 
