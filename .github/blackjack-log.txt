@@ -1,2 +1,3 @@
 Blackjack played on github.com/kanywst. Newest last.
 Hand, bet, the player's cards, the dealer's, and what the table won.
+      1     2u  7 8 15 won  |  dealer 3 2 K Q 25  |  +2u

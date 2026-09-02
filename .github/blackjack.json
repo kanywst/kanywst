@@ -3,46 +3,60 @@
   "seen": [
    "7S",
    "3H",
-   "8S"
+   "8S",
+   "2C",
+   "KD",
+   "QC"
   ],
   "number": 1
  },
  "hand": {
-  "number": 1,
-  "phase": "player",
-  "bet": 2.0,
+  "number": 2,
+  "phase": "betting",
+  "bet": 0,
   "insurance": 0,
-  "hands": [
-   {
-    "cards": [
-     "7S",
-     "8S"
-    ],
-    "bet": 2.0,
-    "doubled": false,
-    "done": false,
-    "surrendered": false,
-    "from_split": false
-   }
-  ],
+  "hands": [],
   "active": 0,
-  "up": "3H",
+  "up": null,
   "hole": null,
   "dealer": [],
   "peeked": false
  },
- "result": 0.0,
- "hands_played": 0,
+ "result": 2.0,
+ "hands_played": 1,
  "coach": {
   "cost": 0.0,
-  "decisions": 0
+  "decisions": 1
  },
  "players": {
   "kanywst": {
    "hands": 1,
-   "decisions": 0,
+   "decisions": 1,
    "cost": 0.0
   }
  },
- "recent": []
+ "recent": [
+  {
+   "number": 1,
+   "bet": 2.0,
+   "hands": [
+    {
+     "cards": [
+      "7S",
+      "8S"
+     ],
+     "result": "won"
+    }
+   ],
+   "dealer": [
+    "3H",
+    "2C",
+    "KD",
+    "QC"
+   ],
+   "dealer_total": 25,
+   "insurance": 0,
+   "net": 2.0
+  }
+ ]
 }

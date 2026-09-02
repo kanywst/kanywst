@@ -13,19 +13,28 @@
 <!-- BLACKJACK:START -->
 <p align="center">6 decks · dealer stands on soft 17 · double after split · late surrender · blackjack pays 3 to 2 · shuffled at 75%</p>
 
-<div align="center"><pre><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/spacer.svg" align="top" alt=""></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/3H.svg" align="top" alt="three of hearts"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/back.svg" align="top" alt="the dealer's hole card, face down"></a></pre></div>
+<div align="center"><pre><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/spacer.svg" align="top" alt=""></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/3H.svg" align="top" alt="three of hearts"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/2C.svg" align="top" alt="two of clubs"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/KD.svg" align="top" alt="king of diamonds"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/QC.svg" align="top" alt="queen of clubs"></a></pre></div>
 
-<div align="center"><pre><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/caret.svg" align="top" alt="the hand in play"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/7S.svg" align="top" alt="seven of spades"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/8S.svg" align="top" alt="eight of spades"></a></pre></div>
+<div align="center"><pre><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/spacer.svg" align="top" alt=""></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/7S.svg" align="top" alt="seven of spades"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/8S.svg" align="top" alt="eight of spades"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/blank.svg" align="top" alt=""></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/blank.svg" align="top" alt=""></a></pre></div>
 
-<p align="center">You have 15 and the dealer shows three.</p>
+<p align="center">You have 15, the dealer busts with 25.</p>
 
-<div align="center"><pre><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Chit+1&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/btn-hit.svg" align="top" alt="hit"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cstand+1&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/btn-stand.svg" align="top" alt="stand"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cdouble+1&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/btn-double.svg" align="top" alt="double"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Csurrender+1&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/btn-surrender.svg" align="top" alt="surrender"></a></pre></div>
+<div align="center"><pre><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cbet+1+2&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/chip1.svg" align="top" alt="bet 1 unit"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cbet+2+2&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/chip2.svg" align="top" alt="bet 2 units"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cbet+5+2&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/chip5.svg" align="top" alt="bet 5 units"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cbet+10+2&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/chip10.svg" align="top" alt="bet 10 units"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cbet+25+2&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/chip25.svg" align="top" alt="bet 25 units"></a></pre></div>
 
-<p align="center">Click one. The issue comes back with what every action was worth against the cards still in the shoe, and what yours cost.</p>
+<p align="center">Pick a chip. The shoe is not reshuffled between hands, so what has come out of it is worth watching.</p>
 
-<p align="center">Shoe 1, 5.9 decks left · out of it: 7 3 8</p>
+<p align="center">Shoe 1, 5.9 decks left · out of it: 7 3 8 2 K Q</p>
 
-<p align="center">0u over 0 hands · 1 player</p>
+<p align="center">+2u over 1 hand · 1 player · 0u of that given away in 1 decisions</p>
+
+<table align="center">
+  <thead>
+    <tr><th>Hand</th><th>You</th><th>Dealer</th><th></th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>1</code></td><td>15 (7 8)</td><td>25 bust (3 2 K Q)</td><td><code>+2u</code></td></tr>
+  </tbody>
+</table>
 <!-- BLACKJACK:END -->
 
 <h2 align="center">Guestbook</h2>
