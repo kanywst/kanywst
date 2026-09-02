@@ -9,48 +9,59 @@
    "QC",
    "KS",
    "KH",
-   "KC"
+   "KC",
+   "2S",
+   "5D"
   ],
   "number": 1
  },
  "hand": {
-  "number": 2,
-  "phase": "player",
-  "bet": 5.0,
+  "number": 3,
+  "phase": "betting",
+  "bet": 0,
   "insurance": 0,
-  "hands": [
-   {
-    "cards": [
-     "KS",
-     "KC"
-    ],
-    "bet": 5.0,
-    "doubled": false,
-    "done": false,
-    "surrendered": false,
-    "from_split": false
-   }
-  ],
+  "hands": [],
   "active": 0,
-  "up": "KH",
+  "up": null,
   "hole": null,
   "dealer": [],
-  "peeked": true
+  "peeked": false
  },
- "result": 2.0,
- "hands_played": 1,
+ "result": 7.0,
+ "hands_played": 2,
  "coach": {
   "cost": 0.0,
-  "decisions": 1
+  "decisions": 2
  },
  "players": {
   "kanywst": {
    "hands": 2,
-   "decisions": 1,
+   "decisions": 2,
    "cost": 0.0
   }
  },
  "recent": [
+  {
+   "number": 2,
+   "bet": 5.0,
+   "hands": [
+    {
+     "cards": [
+      "KS",
+      "KC"
+     ],
+     "result": "won"
+    }
+   ],
+   "dealer": [
+    "KH",
+    "2S",
+    "5D"
+   ],
+   "dealer_total": 17,
+   "insurance": 0,
+   "net": 5.0
+  },
   {
    "number": 1,
    "bet": 2.0,
