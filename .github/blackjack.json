@@ -1,16 +1,32 @@
 {
  "shoe": {
-  "seen": [],
+  "seen": [
+   "7S",
+   "3H",
+   "8S"
+  ],
   "number": 1
  },
  "hand": {
   "number": 1,
-  "phase": "betting",
-  "bet": 0,
+  "phase": "player",
+  "bet": 2.0,
   "insurance": 0,
-  "hands": [],
+  "hands": [
+   {
+    "cards": [
+     "7S",
+     "8S"
+    ],
+    "bet": 2.0,
+    "doubled": false,
+    "done": false,
+    "surrendered": false,
+    "from_split": false
+   }
+  ],
   "active": 0,
-  "up": null,
+  "up": "3H",
   "hole": null,
   "dealer": [],
   "peeked": false
@@ -21,6 +37,12 @@
   "cost": 0.0,
   "decisions": 0
  },
- "players": {},
+ "players": {
+  "kanywst": {
+   "hands": 1,
+   "decisions": 0,
+   "cost": 0.0
+  }
+ },
  "recent": []
 }
