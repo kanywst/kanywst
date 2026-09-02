@@ -700,6 +700,11 @@ def strip(images: list[str]) -> str:
     return '<div align="center"><pre>' + "".join(images) + "</pre></div>"
 
 
+def felt(rows: list[str]) -> str:
+    """The table: every row on its own line inside one pre."""
+    return '<div align="center"><pre>' + "\n".join(rows) + "</pre></div>"
+
+
 def centre(text: str) -> str:
     return f'<p align="center">{text}</p>'
 
@@ -713,10 +718,15 @@ def sign() -> str:
 
 
 def felt_row(images: list[str], width: int) -> str:
-    """One row of the table, padded out to the width of the longest one. Every
-    row is centred, so without the padding a split hand comes out staggered."""
+    """One row of the table, padded out to the width of the longest one.
+
+    The rows go inside one pre rather than one each. GitHub gives a pre a
+    background of its own, so a pre per row bands the table in grey and the
+    felt stops being one surface — the same reason the shogi board was one pre
+    of nine ranks.
+    """
     padded = images + [img("blank", "")] * (width + 1 - len(images))
-    return strip([linked(image, here()) for image in padded])
+    return "".join(linked(image, here()) for image in padded)
 
 
 def table_width(state: dict, entry: dict | None = None) -> int:
@@ -821,8 +831,9 @@ def stats_line(state: dict) -> str:
         f"{len(state['players'])} player{'' if len(state['players']) == 1 else 's'}",
     ]
     if state["coach"]["decisions"]:
+        decisions = state["coach"]["decisions"]
         parts.append(f"{money(abs(coach_cost))} of that given away in"
-                     f" {state['coach']['decisions']} decisions")
+                     f" {decisions} decision{'' if decisions == 1 else 's'}")
     return centre(" · ".join(parts))
 
 
@@ -868,9 +879,8 @@ def render(state: dict) -> str:
         lines += [replay(state), ""]
     else:
         width = table_width(state)
-        lines += [dealer_row(state, width, revealed=False), ""]
-        for row in hand_rows(state, width):
-            lines += [row, ""]
+        lines += [felt([dealer_row(state, width, revealed=False)]
+                       + hand_rows(state, width)), ""]
 
     lines += [centre(headline(state)), ""]
     action = chips(state) if betting else buttons(state)
@@ -897,7 +907,7 @@ def replay(state: dict) -> str:
     for spot in entry["hands"]:
         rows.append(felt_row([img("spacer", "")]
                              + [card_img(c) for c in spot["cards"]], width))
-    return "\n\n".join(rows)
+    return felt(rows)
 
 
 def write_readme(state: dict) -> None:
