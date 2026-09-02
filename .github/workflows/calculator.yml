@@ -16,7 +16,7 @@ on:
       - scripts/bjmath.py
       - tests/test_bjmath.py
       - tests/data/basic-strategy.txt
-      - .github/workflows/slow.yml
+      - .github/workflows/calculator.yml
   schedule:
     - cron: "17 4 * * *"
   workflow_dispatch:
