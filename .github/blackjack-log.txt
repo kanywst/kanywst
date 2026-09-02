@@ -1,0 +1,2 @@
+Blackjack played on github.com/kanywst. Newest last.
+Hand, bet, the player's cards, the dealer's, and what the table won.

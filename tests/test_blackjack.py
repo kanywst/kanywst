@@ -353,6 +353,14 @@ class Shoe(Sandbox):
             self.assertTrue(all(n >= 0 for n in bj.composition(state)))
 
 
+class Log(unittest.TestCase):
+    def test_the_log_in_the_repo_starts_the_way_the_script_writes_it(self):
+        # The committed file is a seed, so that the workflow's `git add` always
+        # has something to add. Nothing else keeps the two texts together.
+        committed = (ROOT / ".github" / "blackjack-log.txt").read_text(encoding="utf-8")
+        self.assertTrue(committed.startswith(bj.header()))
+
+
 class Markup(Sandbox):
     def rendered(self, state) -> str:
         return bj.render(state)
