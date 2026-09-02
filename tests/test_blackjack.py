@@ -434,9 +434,22 @@ class Markup(Sandbox):
     def test_the_rows_are_all_one_width(self):
         state = table(cards=("8S", "3H", "9C"),
                       hands=[spot(["8S", "3H", "9C"]), spot(["8D", "2C"])])
-        rows = re.findall(r"<pre>(.*?)</pre>", self.rendered(state))
-        widths = {row.count("<img") for row in rows[:3]}
+        rows = self.felt_rows(self.rendered(state))
+        widths = {row.count("<img") for row in rows}
         self.assertEqual(len(widths), 1, "a staggered row means a staggered table")
+        self.assertEqual(len(rows), 3)
+
+    def felt_rows(self, html: str) -> list[str]:
+        return re.search(r"<pre>(.*?)</pre>", html, re.DOTALL).group(1).split("\n")
+
+    def test_the_table_is_one_pre(self):
+        # GitHub gives a pre a background of its own, so a pre per row bands the
+        # table in grey and the felt stops reading as one surface.
+        state = table(cards=("8S", "3H"), hands=[spot(["8S", "3H"]), spot(["8D", "2C"])])
+        html = self.rendered(state)
+        self.assertEqual(len(self.felt_rows(html)), 3)
+        # The buttons are their own strip, below the felt.
+        self.assertEqual(html.count("<pre>"), 2)
 
     def test_nothing_can_end_the_raw_html_block(self):
         html = self.rendered(table())
