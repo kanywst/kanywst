@@ -2,3 +2,7 @@ __pycache__/
 *.py[cod]
 
 .playwright-mcp/
+
+# Screenshots taken while checking how the table renders. The art that ships is
+# .github/cards/*.svg and nothing here is ever part of it.
+/*.png

@@ -16,9 +16,9 @@ jobs:
       contents: write
       issues: write
 
-    # Shared with shogi.yml, which also commits to README.md. queue: max so a
-    # waiting run is not cancelled by the next arrival. On the job so that runs
-    # skipped by the `if:` above never take up a slot.
+    # Shared with blackjack.yml, which also commits to README.md. queue: max so
+    # a waiting run is not cancelled by the next arrival. On the job so that
+    # runs skipped by the `if:` above never take up a slot.
     concurrency:
       group: readme-write
       # queue: max cannot be combined with cancel-in-progress: true, and false
@@ -52,7 +52,7 @@ jobs:
             git fetch --quiet origin main
             git reset --quiet --hard origin/main
 
-            # Re-run against the refreshed README: a shogi move may have landed
+            # Re-run against the refreshed README: a hand may have been played
             # while this entry waited its turn.
             python scripts/update_guestbook.py
 

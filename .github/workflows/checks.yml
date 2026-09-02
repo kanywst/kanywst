@@ -23,14 +23,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      # BJ_SLOW turns on the two checks on the calculator that are too slow to
-      # run on every save: the full 260-cell strategy chart, and the Monte Carlo
-      # at enough trials to catch a small bias. Together they are most of the
-      # four minutes this job takes, and they are the reason to trust anything
-      # the table says.
+      # Without BJ_SLOW the calculator is checked against ten cells of the
+      # strategy chart and a short Monte Carlo, which is a minute rather than
+      # four. The full 260 cells and the long run are in calculator.yml, on
+      # anything that touches the calculator and nightly regardless.
       - name: Tests
-        env:
-          BJ_SLOW: "1"
         run: python -m unittest discover -s tests -v
 
       - name: Markdown
