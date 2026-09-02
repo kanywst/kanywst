@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" width="44" height="44" role="img" aria-label="bet 10 units">
+  <rect width="44" height="44" fill="#1c5c43"/>
+  <circle cx="22.0" cy="22.0" r="19.0" fill="#2f5fa8" stroke="#22467c" stroke-width="1.5"/>
+  <g fill="#22467c">
+    <rect x="19.4" y="1.6" width="5.2" height="6" rx="1.6" transform="rotate(0 22.0 22.0)"/>
+    <rect x="19.4" y="1.6" width="5.2" height="6" rx="1.6" transform="rotate(45 22.0 22.0)"/>
+    <rect x="19.4" y="1.6" width="5.2" height="6" rx="1.6" transform="rotate(90 22.0 22.0)"/>
+    <rect x="19.4" y="1.6" width="5.2" height="6" rx="1.6" transform="rotate(135 22.0 22.0)"/>
+    <rect x="19.4" y="1.6" width="5.2" height="6" rx="1.6" transform="rotate(180 22.0 22.0)"/>
+    <rect x="19.4" y="1.6" width="5.2" height="6" rx="1.6" transform="rotate(225 22.0 22.0)"/>
+    <rect x="19.4" y="1.6" width="5.2" height="6" rx="1.6" transform="rotate(270 22.0 22.0)"/>
+    <rect x="19.4" y="1.6" width="5.2" height="6" rx="1.6" transform="rotate(315 22.0 22.0)"/>
+  </g>
+  <circle cx="22.0" cy="22.0" r="13.0" fill="#2f5fa8" stroke="#22467c"/>
+  <text x="22.0" y="27.0" font-family="'Helvetica Neue',Helvetica,Arial,'Liberation Sans',sans-serif" font-size="15" font-weight="700" fill="#f4f7fd" text-anchor="middle" textLength="17" lengthAdjust="spacingAndGlyphs">10</text>
+</svg>

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 62" width="44" height="62" role="img" aria-label="K of diamonds">
+  <rect width="44" height="62" fill="#1c5c43"/>
+  <rect x="2.5" y="2.5" width="39" height="57" rx="4" fill="#fbf9f4" stroke="#d8d2c4"/>
+  <text x="11" y="18" font-family="'Helvetica Neue',Helvetica,Arial,'Liberation Sans',sans-serif" font-size="14" font-weight="700" fill="#b3261e" text-anchor="middle" textLength="9" lengthAdjust="spacingAndGlyphs">K</text>
+  <g transform="translate(6.50 21.50) scale(0.3750)"><path d="M12 1.6 20.4 12 12 22.4 3.6 12Z" fill="#b3261e"/></g>
+  <g transform="translate(13.50 29.50) scale(1.0417)"><path d="M12 1.6 20.4 12 12 22.4 3.6 12Z" fill="#b3261e"/></g>
+</svg>
