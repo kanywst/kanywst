@@ -17,6 +17,10 @@ the shoe (scripts/bjmath.py), and the issue comes back with what each action was
 worth and what the one you took cost. Those costs are added up per player, which
 is the only scoreboard here that is not mostly variance.
 
+A bet is answered the same way, after the fact: what the count was when the chip
+went down and what the chip was worth at it. Before the fact, nothing here says
+anything — the discard tray is under the table and counting it is the game.
+
 Issue titles:
   bj|bet 2 217     - bet two units and deal hand 217
   bj|hit 217       - take a card
@@ -379,6 +383,26 @@ def record_decision(state: dict, user: str, cost: float) -> None:
     who["cost"] += cost
 
 
+def count_note(state: dict, bet: float) -> str:
+    """What the chip was worth before a card came out.
+
+    The table never volunteers the count while there is still a bet to make —
+    the cards that have come out are printed under it and counting them is the
+    game. This is the answer afterwards, which is how a counting drill works:
+    bet first, then find out what the shoe was.
+    """
+    seen = [value_of(c) for c in state["shoe"]["seen"]]
+    running = bjmath.hi_lo(seen)
+    left = cards_left(state)
+    tc = bjmath.true_count(running, left)
+    edge = bjmath.edge_at(tc)
+    return (f"When that chip went down the running count was {running:+d} with"
+            f" {left / 52:.1f} decks left, so the true count was {tc:+.1f}."
+            f" A shoe like that is worth about {edge * 100:+.2f}% a unit, measured"
+            f" over 200 million rounds of these rules — so {money(bet)} on it was"
+            f" worth {edge * bet:+.3f} units before a card came out.")
+
+
 def deal(state: dict, bet: float, user: str) -> str:
     hand = state["hand"]
     hand["bet"] = bet
@@ -544,9 +568,10 @@ def settle(state: dict, note: str) -> str:
 
     parts = [note] if note else []
     parts.append(describe_result(state["recent"][0]))
+    played = state["hands_played"]
     parts.append(f"{money(net, signed=True)}, and the table is"
                  f" {money(state['result'], signed=True)} over"
-                 f" {state['hands_played']} hands.")
+                 f" {played} hand{'' if played == 1 else 's'}.")
     return " ".join(p for p in parts if p)
 
 
@@ -906,7 +931,8 @@ def play(state: dict, command: str, user: str) -> str:
         amount = float(parts[1])
         if amount not in CHIPS:
             return "That is not one of the chips."
-        return deal(state, amount, user)
+        note = count_note(state, amount)
+        return f"{deal(state, amount, user)}\n\n{note}"
 
     if hand["phase"] == "betting":
         return "Nothing has been dealt. Put a chip out first."

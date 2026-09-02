@@ -360,6 +360,44 @@ class Log(unittest.TestCase):
         committed = (ROOT / ".github" / "blackjack-log.txt").read_text(encoding="utf-8")
         self.assertTrue(committed.startswith(bj.header()))
 
+class Counting(Sandbox):
+    def test_the_running_count_is_hi_lo(self):
+        import bjmath
+        self.assertEqual(bjmath.hi_lo([2, 3, 4, 5, 6]), 5)
+        self.assertEqual(bjmath.hi_lo([7, 8, 9]), 0)
+        self.assertEqual(bjmath.hi_lo([10, 1]), -2)
+        # A full shoe counts to nothing, which is the whole point of the tags.
+        self.assertEqual(bjmath.hi_lo([v for v in range(1, 10)] * 4 + [10] * 16), 0)
+
+    def test_the_edge_follows_the_measured_points(self):
+        import bjmath
+        for tc, edge in bjmath.MEASURED_EDGE:
+            with self.subTest(tc=tc):
+                self.assertAlmostEqual(bjmath.edge_at(tc), edge, places=9)
+        # And keeps going in the right direction past the ends of the table.
+        self.assertLess(bjmath.edge_at(-9), bjmath.edge_at(-6))
+        self.assertGreater(bjmath.edge_at(12), bjmath.edge_at(6))
+        self.assertLess(bjmath.edge_at(0), 0)
+
+    def test_the_bet_is_answered_with_what_it_was_worth(self):
+        state = bj.blank_state()
+        # A shoe stripped of its low cards is a shoe worth betting into.
+        state["shoe"]["seen"] = ["5C", "6D", "4H", "3S", "2C"] * 12
+        with stacked("TH", "7D", "9C", "8S"):
+            message = bj.play(state, "bet 25 1", "someone")
+        self.assertIn("running count was +60", message)
+        self.assertIn("true count", message)
+        self.assertIn("units before a card came out", message)
+
+    def test_the_table_says_nothing_about_the_count_before_the_bet(self):
+        state = bj.blank_state()
+        state["shoe"]["seen"] = ["5C", "6D", "4H", "3S", "2C"] * 12
+        html = bj.render(state)
+        self.assertNotIn("true count", html.lower())
+        self.assertNotIn("running", html.lower())
+        # What it does show is the cards, which is what counting is.
+        self.assertIn("out of it:", html)
+
 
 class Markup(Sandbox):
     def rendered(self, state) -> str:
