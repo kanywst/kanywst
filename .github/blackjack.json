@@ -11,18 +11,33 @@
    "KH",
    "KC",
    "2S",
-   "5D"
+   "5D",
+   "8D",
+   "2H",
+   "3H"
   ],
   "number": 1
  },
  "hand": {
   "number": 3,
-  "phase": "betting",
-  "bet": 0,
+  "phase": "player",
+  "bet": 10.0,
   "insurance": 0,
-  "hands": [],
+  "hands": [
+   {
+    "cards": [
+     "8D",
+     "3H"
+    ],
+    "bet": 10.0,
+    "doubled": false,
+    "done": false,
+    "surrendered": false,
+    "from_split": false
+   }
+  ],
   "active": 0,
-  "up": null,
+  "up": "2H",
   "hole": null,
   "dealer": [],
   "peeked": false
@@ -35,7 +50,7 @@
  },
  "players": {
   "kanywst": {
-   "hands": 2,
+   "hands": 3,
    "decisions": 2,
    "cost": 0.0
   }
