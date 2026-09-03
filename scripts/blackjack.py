@@ -569,8 +569,7 @@ def settle(state: dict, note: str) -> str:
     parts = [note] if note else []
     parts.append(describe_result(state["recent"][0]))
     played = state["hands_played"]
-    parts.append(f"{money(net, signed=True)}, and the table is"
-                 f" {money(state['result'], signed=True)} over"
+    parts.append(f"The table is {money(state['result'], signed=True)} over"
                  f" {played} hand{'' if played == 1 else 's'}.")
     return " ".join(p for p in parts if p)
 
@@ -580,7 +579,8 @@ def remember(state: dict, net: float, dealer: list[str], dealer_total: int) -> N
     entry = {
         "number": hand["number"],
         "bet": hand["bet"],
-        "hands": [{"cards": list(s["cards"]), "result": s["result"]} for s in hand["hands"]],
+        "hands": [{"cards": list(s["cards"]), "result": s["result"],
+                    "bet": s["bet"], "doubled": s["doubled"]} for s in hand["hands"]],
         "dealer": list(dealer),
         "dealer_total": dealer_total,
         "insurance": hand["insurance"],
@@ -591,18 +591,37 @@ def remember(state: dict, net: float, dealer: list[str], dealer_total: int) -> N
 
 
 def describe_result(entry: dict) -> str:
-    dealer = entry["dealer"]
+    """One sentence for a hand that is over.
+
+    In the order the cards are on the felt, dealer first, and in the past tense,
+    because the hand it describes has been settled. Said in the present it reads
+    like a hand still waiting on a decision, and two totals with no winner named
+    is not a result.
+    """
     dealer_total = entry["dealer_total"]
-    dealer_text = ("busts with " + str(dealer_total) if dealer_total > 21
-                   else ("has blackjack" if is_natural(dealer) else f"has {dealer_total}"))
-    if len(entry["hands"]) == 1:
-        spot = entry["hands"][0]
-        mine = spell(hand_total(spot["cards"]), spot["cards"])
-        if spot["result"] == "surrendered":
-            return f"You gave up {mine}; the dealer {dealer_text}."
-        return f"You have {mine}, the dealer {dealer_text}."
+    dealer_text = ("busted with " + str(dealer_total) if dealer_total > 21
+                   else ("had blackjack" if is_natural(entry["dealer"])
+                         else f"had {dealer_total}"))
+
+    doubled = any(s.get("doubled") for s in entry["hands"])
     totals = " and ".join(spell(hand_total(s["cards"]), s["cards"]) for s in entry["hands"])
-    return f"You have {totals}, the dealer {dealer_text}."
+
+    net = entry["net"]
+    if net > 0:
+        money_text = f"it paid {money(net)}"
+    elif net < 0:
+        money_text = f"it cost {money(-net)}"
+    else:
+        money_text = "it ended level"
+
+    if entry["hands"][0]["result"] == "surrendered":
+        mine = f"you gave up {totals}"
+    elif doubled:
+        # Naming the double is what explains a hand that cost twice its chip.
+        mine = f"your double came to {totals}"
+    else:
+        mine = f"you had {totals}"
+    return f"Hand {entry['number']} is over. The dealer {dealer_text}, {mine}, and {money_text}."
 
 
 def reshuffle(state: dict) -> None:
@@ -792,17 +811,20 @@ def chips(state: dict) -> str:
 
 def headline(state: dict) -> str:
     hand = state["hand"]
+    # The dealer is named first throughout, because the dealer's cards are the
+    # top row. A sentence in the other order asks the reader to work out which
+    # row is theirs.
     if hand["phase"] == "insurance":
         spot = hand["hands"][0]
-        return (f"You have {spell(hand_total(spot['cards']), spot['cards'])}."
-                " The dealer shows an ace and has not looked yet:"
-                " insurance costs half your bet and pays 2 to 1.")
+        return ("The dealer shows an ace and has not looked yet, and you have"
+                f" {spell(hand_total(spot['cards']), spot['cards'])}."
+                " Insurance costs half your bet and pays 2 to 1.")
     if hand["phase"] == "player":
         spot = active(state)
         mine = spell(hand_total(spot["cards"]), spot["cards"])
         where = "" if len(hand["hands"]) == 1 else f" on hand {hand['active'] + 1}"
-        return (f"You have {mine}{where} and the dealer shows"
-                f" {RANK_NAME[rank_of(hand['up'])]}.")
+        return (f"The dealer shows {RANK_NAME[rank_of(hand['up'])]},"
+                f" and you have {mine}{where}.")
     if state["recent"]:
         return describe_result(state["recent"][0])
     return "Put a chip out and the cards come."
