@@ -29,7 +29,8 @@ def svg_files() -> list[pathlib.Path]:
 class Art(unittest.TestCase):
     def test_every_image_the_table_can_name_exists(self):
         expected = {f"{rank}{suit}" for rank in make_cards.RANKS for suit in make_cards.SUITS}
-        expected |= {"back", "slot", "blank", "caret", "spacer"}
+        expected |= {"back", "slot", "blank", "label-dealer", "label-you",
+                     "label-you-sel"}
         expected |= {f"chip{value}" for value in make_cards.CHIPS}
         expected |= {f"btn-{label}" for label in make_cards.BUTTONS}
         self.assertEqual({p.stem for p in svg_files()}, expected)
@@ -61,7 +62,8 @@ class Art(unittest.TestCase):
         heights = set()
         for path in svg_files():
             root = ET.parse(path).getroot()
-            if path.stem in ("caret", "spacer", "blank", "back", "slot") or len(path.stem) == 2:
+            if path.stem.startswith("label-") or len(path.stem) == 2 \
+                    or path.stem in ("blank", "back", "slot"):
                 heights.add(root.get("height"))
         self.assertEqual(heights, {str(make_cards.H)})
 
@@ -94,7 +96,7 @@ class Art(unittest.TestCase):
             with self.subTest(path.name):
                 self.assertEqual(root.get("role"), "img")
                 label = root.get("aria-label")
-                if path.stem in ("spacer", "blank"):
+                if path.stem == "blank":
                     self.assertEqual(label, "")
                 else:
                     self.assertTrue(label)
