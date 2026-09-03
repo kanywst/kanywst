@@ -507,6 +507,36 @@ class Markup(Sandbox):
         self.assertIn("slot.svg", html)
         self.assertIn("chip1.svg", html)
 
+    def test_the_finished_hand_says_who_took_it(self):
+        # Two totals in the present tense read like a hand still waiting on a
+        # decision. This is the line a visitor sees between hands.
+        state = table(up="2H", cards=("8D", "3H"), bet=10)
+        with stacked("4C", "2C", "5S", "KD"):
+            bj.play(state, "double 7", "someone")
+        line = bj.headline(state)
+        self.assertIn("Hand 7 is over", line)
+        self.assertIn("The dealer had 19", line)
+        self.assertIn("your double came to 15", line)
+        self.assertIn("it cost 20u", line)
+        self.assertIn(line, bj.render(state))
+
+    def test_the_dealer_is_named_first_because_the_dealer_is_the_top_row(self):
+        state = table(up="KH", cards=("8D", "3H"))
+        line = bj.headline(state)
+        self.assertLess(line.index("dealer"), line.index("you"))
+
+    def test_a_hand_that_paid_says_so(self):
+        state = table(up="TS", cards=("TH", "TD"))
+        with stacked("8C"):
+            bj.play(state, "stand 7", "someone")
+        self.assertIn("it paid 2u", bj.headline(state))
+
+    def test_a_push_ends_level(self):
+        state = table(up="TS", cards=("TH", "TD"))
+        with stacked("TC"):
+            bj.play(state, "stand 7", "someone")
+        self.assertIn("it ended level", bj.headline(state))
+
     def test_the_hands_played_recently_are_shown(self):
         state = bj.blank_state()
         state["recent"] = [{
