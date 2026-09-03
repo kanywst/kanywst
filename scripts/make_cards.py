@@ -44,6 +44,9 @@ MARKER = "#c1121f"
 WOOD = "#f0d9a8"
 WOOD_EDGE = "#8b6f47"
 
+# What a real table has printed on the cloth: readable, and quieter than a card.
+PRINT = "#8fb3a0"
+
 FONT = "'Helvetica Neue',Helvetica,Arial,'Liberation Sans',sans-serif"
 
 RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K"]
@@ -196,13 +199,27 @@ def button(label: str) -> str:
     )
 
 
-def caret(active: bool) -> str:
-    """Which of several split hands is being played. A red frame around the
-    cards would mean drawing all 52 twice, so the marker sits beside the row."""
-    w = 16
-    mark = (f'\n  <path d="M5 {H / 2 - 7} L12 {H / 2} L5 {H / 2 + 7} Z" fill="{MARKER}"/>'
-            if active else "")
-    return head(w, H, "hand in play" if active else "") + felt(w, H) + mark + "\n</svg>\n"
+def seat(word: str, active: bool = False) -> str:
+    """Whose row this is, printed on the felt at the head of it.
+
+    A real table has its layout printed on the cloth, and this one needs it more
+    than most: the only other thing saying which row belongs to the dealer is a
+    sentence underneath, and a reader should not have to find a sentence to read
+    a table. The frame marks which of several split hands is in play, since a
+    red frame around the cards themselves would mean drawing all 52 twice.
+    """
+    w = 52
+    frame = (f'\n  <rect x="2.25" y="2.25" width="{w - 4.5}" height="{H - 4.5}" fill="none"'
+             f' stroke="{MARKER}" stroke-width="3"/>' if active else "")
+    body = word.upper()
+    inner = round(len(body) * 6.4)
+    return (head(w, H, word + (" in play" if active else ""))
+            + felt(w, H)
+            + f'\n  <text x="{w / 2}" y="{H / 2 + 4}" font-family="{FONT}" font-size="9"'
+              f' font-weight="700" letter-spacing="1" fill="{PRINT}" text-anchor="middle"'
+              f' textLength="{inner}" lengthAdjust="spacingAndGlyphs">{body}</text>'
+            + frame
+            + "\n</svg>\n")
 
 
 def main() -> None:
@@ -228,8 +245,9 @@ def main() -> None:
     for label in BUTTONS:
         write(f"btn-{label}", button(label))
 
-    write("caret", caret(True))
-    write("spacer", caret(False))
+    write("label-dealer", seat("dealer"))
+    write("label-you", seat("you"))
+    write("label-you-sel", seat("you", active=True))
 
     print(f"wrote {written} files to {OUT}")
 

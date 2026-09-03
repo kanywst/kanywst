@@ -621,7 +621,7 @@ def describe_result(entry: dict) -> str:
         mine = f"your double came to {totals}"
     else:
         mine = f"you had {totals}"
-    return f"Hand {entry['number']} is over. The dealer {dealer_text}, {mine}, and {money_text}."
+    return f"Hand {entry['number']}: the dealer {dealer_text}, {mine}, and {money_text}."
 
 
 def reshuffle(state: dict) -> None:
@@ -731,8 +731,17 @@ def centre(text: str) -> str:
 def sign() -> str:
     return centre(
         f"{RULES.decks} decks · dealer stands on soft 17 · double after split"
-        f" · late surrender · blackjack pays 3 to 2 · shuffled at"
-        f" {round(RULES.penetration * 100)}%"
+        f" · late surrender · blackjack pays 3 to 2 · shuffled at the"
+        f" {round(RULES.penetration * 100)}% cut card"
+    )
+
+
+def how() -> str:
+    """The only instruction on the table, and the only one it needs: what the
+    game is, what a click does, and how long to wait for it."""
+    return centre(
+        "Beat the dealer without going over 21. A click opens a prefilled issue:"
+        " submit it and the table moves in about 30 seconds."
     )
 
 
@@ -756,7 +765,7 @@ def table_width(state: dict, entry: dict | None = None) -> int:
 
 def dealer_row(state: dict, width: int, revealed: bool) -> str:
     hand = state["hand"]
-    images = [img("spacer", "")]
+    images = [img("label-dealer", "dealer")]
     if not hand["up"]:
         images += [img("slot", "empty slot"), img("slot", "empty slot")]
     elif revealed:
@@ -771,12 +780,16 @@ def hand_rows(state: dict, width: int) -> list[str]:
     hand = state["hand"]
     live = hand["phase"] == "player"
     if not hand["hands"]:
-        return [felt_row([img("spacer", ""), img("slot", "empty slot"),
+        return [felt_row([img("label-you", "you"), img("slot", "empty slot"),
                           img("slot", "empty slot")], width)]
     rows = []
+    # The frame says which of several hands is in play. With one hand there is
+    # nothing to tell apart, and a frame around it only reads as an alarm.
+    split = len(hand["hands"]) > 1
     for i, spot in enumerate(hand["hands"]):
-        turn = live and i == hand["active"]
-        images = [img("caret", "the hand in play") if turn else img("spacer", "")]
+        turn = live and split and i == hand["active"]
+        images = [img("label-you-sel", "your hand, in play") if turn
+                  else img("label-you", "you")]
         images += [card_img(c) for c in spot["cards"]]
         rows.append(felt_row(images, width))
     return rows
@@ -815,9 +828,7 @@ def headline(state: dict) -> str:
     # top row. A sentence in the other order asks the reader to work out which
     # row is theirs.
     if hand["phase"] == "insurance":
-        spot = hand["hands"][0]
-        return ("The dealer shows an ace and has not looked yet, and you have"
-                f" {spell(hand_total(spot['cards']), spot['cards'])}."
+        return ("The dealer shows an ace and has not looked yet."
                 " Insurance costs half your bet and pays 2 to 1.")
     if hand["phase"] == "player":
         spot = active(state)
@@ -825,9 +836,12 @@ def headline(state: dict) -> str:
         where = "" if len(hand["hands"]) == 1 else f" on hand {hand['active'] + 1}"
         return (f"The dealer shows {RANK_NAME[rank_of(hand['up'])]},"
                 f" and you have {mine}{where}.")
+    # Between hands the table has to say what to click next. It is the one
+    # moment where the thing to press is not obviously a button.
+    deal = f"Pick a chip to deal hand {hand['number']}."
     if state["recent"]:
-        return describe_result(state["recent"][0])
-    return "Put a chip out and the cards come."
+        return f"{describe_result(state['recent'][0])} {deal}"
+    return deal
 
 
 def shoe_line(state: dict) -> str:
@@ -837,11 +851,11 @@ def shoe_line(state: dict) -> str:
     shown = 24
     tray = " ".join(rank_of(c) for c in seen[-shown:])
     if not seen:
-        return centre(f"Shoe {state['shoe']['number']}, freshly shuffled,"
-                      f" {decks:.1f} decks left")
+        return centre(f"Shoe {state['shoe']['number']} · freshly shuffled"
+                      f" · {decks:.1f} decks left")
     where = f"https://github.com/{REPO}/blob/main/.github/blackjack.json"
     rest = (f' · <a href="{where}">all {len(seen)}</a>' if len(seen) > shown else "")
-    return centre(f"Shoe {state['shoe']['number']}, {decks:.1f} decks left"
+    return centre(f"Shoe {state['shoe']['number']} · {decks:.1f} decks left"
                   f" · out of it: {tray}{rest}")
 
 
@@ -853,9 +867,7 @@ def stats_line(state: dict) -> str:
         f"{len(state['players'])} player{'' if len(state['players']) == 1 else 's'}",
     ]
     if state["coach"]["decisions"]:
-        decisions = state["coach"]["decisions"]
-        parts.append(f"{money(abs(coach_cost))} of that given away in"
-                     f" {decisions} decision{'' if decisions == 1 else 's'}")
+        parts.append(f"{money(abs(coach_cost))} lost to mistakes")
     return centre(" · ".join(parts))
 
 
@@ -892,7 +904,7 @@ def recent_table(state: dict) -> list[str]:
 def render(state: dict) -> str:
     hand = state["hand"]
     betting = hand["phase"] == "betting"
-    lines = [sign(), ""]
+    lines = []
 
     if betting and state["recent"]:
         # The hand that just ended stays on the felt, face up, until the next
@@ -904,30 +916,27 @@ def render(state: dict) -> str:
         lines += [felt([dealer_row(state, width, revealed=False)]
                        + hand_rows(state, width)), ""]
 
-    lines += [centre(headline(state)), ""]
+    head = headline(state)
+    if head:
+        lines += [centre(head), ""]
     action = chips(state) if betting else buttons(state)
     if action:
         lines += [action, ""]
-    lines += [centre(
-        "Pick a chip. The shoe is not reshuffled between hands, so what has come"
-        " out of it is worth watching." if betting else
-        "Click one. The issue comes back with what every action was worth"
-        " against the cards still in the shoe, and what yours cost."), ""]
 
-    lines += [shoe_line(state), "", stats_line(state)]
-    table = recent_table(state)
-    if table:
-        lines += [""] + table
-    return "\n".join(lines)
+    lines += [how(), "", shoe_line(state), "", stats_line(state), ""]
+    lines += recent_table(state)
+    lines += ["" if state["recent"] else None, sign()]
+    return "\n".join(line for line in lines if line is not None)
 
 
 def replay(state: dict) -> str:
     """The last finished hand, dealer's cards and all."""
     entry = state["recent"][0]
     width = table_width(state, entry)
-    rows = [felt_row([img("spacer", "")] + [card_img(c) for c in entry["dealer"]], width)]
+    rows = [felt_row([img("label-dealer", "dealer")]
+                     + [card_img(c) for c in entry["dealer"]], width)]
     for spot in entry["hands"]:
-        rows.append(felt_row([img("spacer", "")]
+        rows.append(felt_row([img("label-you", "you")]
                              + [card_img(c) for c in spot["cards"]], width))
     return felt(rows)
 

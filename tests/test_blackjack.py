@@ -514,16 +514,47 @@ class Markup(Sandbox):
         with stacked("4C", "2C", "5S", "KD"):
             bj.play(state, "double 7", "someone")
         line = bj.headline(state)
-        self.assertIn("Hand 7 is over", line)
-        self.assertIn("The dealer had 19", line)
+        self.assertIn("Hand 7: the dealer", line)
+        self.assertIn("the dealer had 19", line)
         self.assertIn("your double came to 15", line)
         self.assertIn("it cost 20u", line)
+        # And the table says what to press next, which is the one moment where
+        # the thing to click is not obviously a button.
+        self.assertIn("Pick a chip to deal hand 8", line)
         self.assertIn(line, bj.render(state))
 
     def test_the_dealer_is_named_first_because_the_dealer_is_the_top_row(self):
         state = table(up="KH", cards=("8D", "3H"))
         line = bj.headline(state)
         self.assertLess(line.index("dealer"), line.index("you"))
+
+    def test_the_felt_says_whose_row_is_whose(self):
+        # Without this a reader has to find a sentence to work out which row is
+        # theirs, which is exactly what happened to the first person who looked.
+        html = bj.render(table())
+        self.assertIn("label-dealer.svg", html)
+        self.assertIn("label-you.svg", html)
+        self.assertIn('alt="dealer"', html)
+        self.assertIn('alt="you"', html)
+        # One hand is not marked as the one in play: there is nothing to tell
+        # it apart from, and the frame would only read as an alarm.
+        self.assertNotIn("label-you-sel.svg", html)
+
+    def test_the_hand_in_play_is_marked_on_its_own_row(self):
+        state = table(cards=("8S", "3H"),
+                      hands=[spot(["8S", "3H"]), spot(["8D", "2C"])], active=1)
+        rows = re.search(r"<pre>(.*?)</pre>", bj.render(state), re.DOTALL).group(1).split("\n")
+        self.assertIn("label-dealer", rows[0])
+        self.assertIn("label-you.svg", rows[1])
+        self.assertIn("label-you-sel.svg", rows[2])
+
+    def test_the_table_explains_itself_in_one_line(self):
+        for state in (table(), bj.blank_state()):
+            html = bj.render(state)
+            self.assertIn("Beat the dealer without going over 21", html)
+            self.assertIn("about 30 seconds", html)
+            # The rule set is a footer, not the first thing anybody reads.
+            self.assertGreater(html.index("6 decks"), html.index("Beat the dealer"))
 
     def test_a_hand_that_paid_says_so(self):
         state = table(up="TS", cards=("TH", "TD"))
