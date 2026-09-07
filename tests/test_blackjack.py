@@ -580,6 +580,47 @@ class Markup(Sandbox):
         self.assertIn("17 (T 7)", html)
         self.assertIn("-2u", html)
 
+    def test_the_table_names_the_account_that_played_the_hand(self):
+        # "You" names nobody: whoever reads the profile is almost never whoever
+        # was sitting at the table.
+        state = table(up="2H", cards=("8D", "3H"), bet=10)
+        with stacked("2C", "5S", "KD"):
+            bj.play(state, "stand 7", "kanywst")
+        html = self.rendered(state)
+        self.assertIn('<a href="https://github.com/kanywst">@kanywst</a>', html)
+        self.assertNotIn("<th>You</th>", html)
+
+    def test_a_hand_two_accounts_played_names_them_both(self):
+        state = table(up="2H", cards=("8D", "3H"), bet=10)
+        bj.touch(state, "dealt-it")
+        with stacked("2C", "5S", "KD"):
+            bj.play(state, "stand 7", "stood-on-it")
+        html = self.rendered(state)
+        self.assertIn("@dealt-it", html)
+        self.assertIn("@stood-on-it", html)
+
+    def test_a_name_that_is_not_a_login_is_never_printed(self):
+        # The name arrives from an issue and lands on the profile as a link.
+        state = table(up="2H", cards=("8D", "3H"), bet=10)
+        with stacked("2C", "5S", "KD"):
+            bj.play(state, "stand 7", '"><img src=x onerror=alert(1)>')
+        html = self.rendered(state)
+        self.assertNotIn("<img src=x", html)
+        self.assertNotIn("onerror", html)
+        self.assertEqual(state["recent"][0]["by"], [])
+
+    def test_the_names_on_one_hand_stop_at_what_the_column_holds(self):
+        state = table(up="2H", cards=("8D", "3H"), bet=10)
+        for i in range(5):
+            bj.touch(state, f"player-{i}")
+        with stacked("2C", "5S", "KD"):
+            bj.play(state, "stand 7", "player-5")
+        html = self.rendered(state)
+        self.assertIn("@player-0", html)
+        self.assertIn("@player-1", html)
+        self.assertNotIn("@player-2", html)
+        self.assertIn("+4", html)
+
 
 if __name__ == "__main__":
     unittest.main()

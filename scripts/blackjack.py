@@ -74,6 +74,8 @@ CHIPS = [1, 2, 5, 10, 25]
 MAX_RECENT = 3         # Hands shown under the table. The rest are in the log.
 MAX_LOG_SHOES = 40     # The oldest shoes fall off first.
 MAX_PLAYERS = 200
+MAX_HANDS_BY = 8       # Accounts kept against one hand. Anyone can click.
+MAX_NAMED = 2          # Of those, the ones the table has room to name.
 
 RNG = secrets.SystemRandom()
 
@@ -217,6 +219,7 @@ def blank_hand(number: int) -> dict:
         "hole": None,
         "dealer": [],
         "peeked": False,
+        "by": [],
     }
 
 
@@ -265,6 +268,8 @@ def load_state() -> dict:
                 return False
             if any(c not in known for c in h["cards"]):
                 return False
+        if not isinstance(value.get("by", []), list):
+            return False
         return isinstance(value.get("number"), int) and value["number"] > 0
 
     checks = {
@@ -356,6 +361,31 @@ def coach(state: dict, action: str) -> tuple[str, float]:
     return "\n".join(lines), cost
 
 
+def handle(user: str) -> str:
+    """A GitHub login, or nothing at all.
+
+    The name goes onto the profile page as a link, so only what a login can
+    actually be gets written there: letters, digits and single hyphens, 39
+    characters at most. Anything else is a name the table declines to print.
+    """
+    if re.fullmatch(r"[A-Za-z0-9](?:-?[A-Za-z0-9]){0,38}", user):
+        return user
+    return ""
+
+
+def touch(state: dict, user: str) -> None:
+    """Note that this account played the hand on the table.
+
+    The table is a queue of strangers, so a hand is not necessarily one
+    person's: whoever bets it may not be whoever hits it. Kept in the order
+    they arrived, first come first named.
+    """
+    name = handle(user)
+    by = state["hand"].setdefault("by", [])
+    if name and name not in by and len(by) < MAX_HANDS_BY:
+        by.append(name)
+
+
 def player(state: dict, user: str) -> dict:
     """The record kept for one player, made if it is not there.
 
@@ -364,6 +394,7 @@ def player(state: dict, user: str) -> dict:
     and had one. Otherwise the ceiling below would only be applied on the paths
     that happen to reach it, and a public state file would grow past it.
     """
+    touch(state, user)
     who = state["players"].setdefault(user, {"hands": 0, "decisions": 0, "cost": 0.0})
     if len(state["players"]) > MAX_PLAYERS:
         # Only the count is ever shown, and a table played by the whole internet
@@ -585,6 +616,7 @@ def remember(state: dict, net: float, dealer: list[str], dealer_total: int) -> N
         "dealer_total": dealer_total,
         "insurance": hand["insurance"],
         "net": net,
+        "by": list(hand.get("by", [])),
     }
     state["recent"].insert(0, entry)
     del state["recent"][MAX_RECENT:]
@@ -871,6 +903,24 @@ def stats_line(state: dict) -> str:
     return centre(" · ".join(parts))
 
 
+def played_by(entry: dict) -> str:
+    """Who took the hand, linked to the account that took it.
+
+    A row that says "you" to everyone who reads the profile names nobody: the
+    person at the table was one particular account, and the visitor reading it
+    is usually not them. Past the first couple the rest are counted, because a
+    column that grows with the queue stops being a column.
+    """
+    names = [n for n in entry.get("by", []) if handle(n)]
+    if not names:
+        return ""
+    shown = [f'<a href="https://github.com/{n}">@{n}</a>' for n in names[:MAX_NAMED]]
+    rest = len(names) - len(shown)
+    if rest:
+        shown.append(f"+{rest}")
+    return " ".join(shown)
+
+
 def recent_table(state: dict) -> list[str]:
     if not state["recent"]:
         return []
@@ -884,15 +934,17 @@ def recent_table(state: dict) -> list[str]:
         total = entry["dealer_total"]
         shown = ("blackjack" if is_natural(dealer) else
                  (f"{total} bust" if total > 21 else str(total)))
+        who = played_by(entry)
         rows.append(
-            f"    <tr><td><code>{entry['number']}</code></td><td>{mine}</td>"
+            f"    <tr><td><code>{entry['number']}</code>{' ' + who if who else ''}</td>"
+            f"<td>{mine}</td>"
             f"<td>{shown} ({ranks_of(dealer)})</td>"
             f"<td><code>{money(entry['net'], signed=True)}</code></td></tr>"
         )
     return [
         '<table align="center">',
         "  <thead>",
-        "    <tr><th>Hand</th><th>You</th><th>Dealer</th><th></th></tr>",
+        "    <tr><th>Hand</th><th>Player</th><th>Dealer</th><th></th></tr>",
         "  </thead>",
         "  <tbody>",
         *rows,

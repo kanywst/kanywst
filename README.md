@@ -26,12 +26,12 @@
 
 <table align="center">
   <thead>
-    <tr><th>Hand</th><th>You</th><th>Dealer</th><th></th></tr>
+    <tr><th>Hand</th><th>Player</th><th>Dealer</th><th></th></tr>
   </thead>
   <tbody>
-    <tr><td><code>4</code></td><td>15 (9 6)</td><td>17 (6 K A)</td><td><code>-10u</code></td></tr>
-    <tr><td><code>3</code></td><td>15 (8 3 4)</td><td>19 (2 2 5 K)</td><td><code>-20u</code></td></tr>
-    <tr><td><code>2</code></td><td>20 (K K)</td><td>17 (K 2 5)</td><td><code>+5u</code></td></tr>
+    <tr><td><code>4</code> <a href="https://github.com/kanywst">@kanywst</a></td><td>15 (9 6)</td><td>17 (6 K A)</td><td><code>-10u</code></td></tr>
+    <tr><td><code>3</code> <a href="https://github.com/kanywst">@kanywst</a></td><td>15 (8 3 4)</td><td>19 (2 2 5 K)</td><td><code>-20u</code></td></tr>
+    <tr><td><code>2</code> <a href="https://github.com/kanywst">@kanywst</a></td><td>20 (K K)</td><td>17 (K 2 5)</td><td><code>+5u</code></td></tr>
   </tbody>
 </table>
 
