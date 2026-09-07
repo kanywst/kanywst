@@ -754,6 +754,13 @@ def append_log(state: dict, net: float, dealer: list[str]) -> None:
     line = (f"  {hand['number']:>5}  {money(hand['bet']):>5}  {hands}"
             f"  |  dealer {ranks_of(dealer)} {hand_total(dealer)}"
             f"  |  {money(net, signed=True)}")
+    # Last, and only when there is one: a login can be 39 characters and the
+    # columns before it are read down the page. Every name, not the two a row
+    # has room for — this is the record, and it is the only place the hands
+    # that have fallen off the table are kept.
+    who = " ".join(f"@{n}" for n in names_in(hand))
+    if who:
+        line += f"  |  {who}"
     LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
     existing = LOG_PATH.read_text(encoding="utf-8") if LOG_PATH.exists() else header()
     LOG_PATH.write_text(existing.rstrip("\n") + "\n" + line + "\n", encoding="utf-8")
@@ -761,7 +768,8 @@ def append_log(state: dict, net: float, dealer: list[str]) -> None:
 
 def header() -> str:
     return ("Blackjack played on github.com/kanywst. Newest last.\n"
-            "Hand, bet, the player's cards, the dealer's, and what the table won.\n")
+            "Hand, bet, the player's cards, the dealer's, what the table won,"
+            " and who played it.\n")
 
 
 def log_shoe(state: dict) -> None:
