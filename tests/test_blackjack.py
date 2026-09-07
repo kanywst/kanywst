@@ -14,6 +14,7 @@ about what happens on a split ace.
 """
 
 import contextlib
+import json
 import pathlib
 import re
 import sys
@@ -246,6 +247,29 @@ class Insurance(Sandbox):
         with coin(0.99), stacked("7C"):
             bj.play(state, "ins yes 7", "someone")
         self.assertLess(state["coach"]["cost"], 0)
+
+
+class StateFile(Sandbox):
+    """The file is public, editable by hand, and read again on every click. A
+    hand that comes back malformed must cost one hand, not the table."""
+
+    def test_a_hand_whose_names_are_not_names_is_dealt_again(self):
+        stored = bj.blank_state()
+        stored["hand"]["number"] = 12
+        stored["hand"]["by"] = [123]
+        bj.STATE_PATH.write_text(json.dumps(stored), encoding="utf-8")
+        state = bj.load_state()
+        self.assertEqual(state["hand"]["by"], [])
+        self.assertEqual(state["hand"]["number"], 1)
+
+    def test_a_name_that_is_not_a_string_is_not_drawn(self):
+        # The settled hands are only checked as a list, so the renderer is the
+        # thing that has to hold: a row that raises takes down write_readme.
+        state = settled(by=(123, "kanywst"))
+        row = "\n".join(bj.recent_table(state))
+        self.assertIn("@kanywst", row)
+        self.assertNotIn("123", row)
+        self.assertIn("@kanywst had 15", bj.headline(state))
 
 
 class Secrets(Sandbox):
@@ -627,6 +651,15 @@ class Markup(Sandbox):
         self.assertNotIn("<img src=x", html)
         self.assertNotIn("onerror", html)
         self.assertEqual(state["recent"][0]["by"], [])
+
+    def test_only_a_login_shaped_name_is_a_login(self):
+        for name in ("kanywst", "a", "a-b", "9", "x" * 39):
+            with self.subTest(name):
+                self.assertEqual(bj.handle(name), name)
+        for name in ("-lead", "trail-", "double--hyphen", "sp ace", "dot.dot",
+                     "x" * 40, "a-" * 30 + "b", "", 12, None, ["kanywst"]):
+            with self.subTest(name):
+                self.assertEqual(bj.handle(name), "")
 
     def test_the_settled_hand_is_told_with_the_name_that_played_it(self):
         state = settled(by=("kanywst",))

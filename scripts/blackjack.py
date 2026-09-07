@@ -269,7 +269,8 @@ def load_state() -> dict:
                 return False
             if any(c not in known for c in h["cards"]):
                 return False
-        if not isinstance(value.get("by", []), list):
+        by = value.get("by", [])
+        if not isinstance(by, list) or not all(isinstance(n, str) for n in by):
             return False
         return isinstance(value.get("number"), int) and value["number"] > 0
 
@@ -367,9 +368,13 @@ def handle(user: str) -> str:
 
     The name goes onto the profile page as a link, so only what a login can
     actually be gets written there: letters, digits and single hyphens, 39
-    characters at most. Anything else is a name the table declines to print.
+    characters at most. Anything else is a name the table declines to print,
+    including whatever a hand-edited state file might be holding instead of a
+    string.
     """
-    if re.fullmatch(r"[A-Za-z0-9](?:-?[A-Za-z0-9]){0,38}", user):
+    if not isinstance(user, str) or len(user) > 39:
+        return ""
+    if re.fullmatch(r"[A-Za-z0-9](?:-?[A-Za-z0-9])*", user):
         return user
     return ""
 
