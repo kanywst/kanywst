@@ -605,7 +605,8 @@ class Markup(Sandbox):
         with stacked("2C", "5S", "KD"):
             bj.play(state, "stand 7", "kanywst")
         html = self.rendered(state)
-        self.assertIn('<a href="https://github.com/kanywst">@kanywst</a>', html)
+        self.assertIn('href="https://github.com/kanywst"', html)
+        self.assertIn(">@kanywst</a>", html)
         self.assertNotIn("<th>You</th>", html)
 
     def test_a_hand_two_accounts_played_names_them_both(self):
@@ -672,9 +673,14 @@ class Markup(Sandbox):
         with stacked("2C", "5S", "KD"):
             bj.play(state, "stand 7", long_names[1])
         row = "\n".join(bj.recent_table(state))
-        self.assertIn("@" + long_names[0], row)
-        self.assertNotIn("@" + long_names[1], row)
+        self.assertNotIn(long_names[1], row)
         self.assertIn("+1", row)
+        # The name is cut to what the column can hold, and the link still goes
+        # to the account it was cut from.
+        self.assertIn(f'href="https://github.com/{long_names[0]}"', row)
+        self.assertIn(f'title="@{long_names[0]}"', row)
+        self.assertIn("…</a>", row)
+        self.assertNotIn(f">@{long_names[0]}<", row)
         # And the sentence under the felt counts the second one too.
         self.assertIn("and 1 other had 11", bj.headline(state))
 

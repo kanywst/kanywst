@@ -76,6 +76,7 @@ MAX_LOG_SHOES = 40     # The oldest shoes fall off first.
 MAX_PLAYERS = 200
 MAX_HANDS_BY = 8       # Accounts kept against one hand. Anyone can click.
 NAME_ROOM = 24         # Characters of login the row has room for, past the first.
+MAX_NAME = 16          # Characters of one login before the row elides it.
 
 RNG = secrets.SystemRandom()
 
@@ -622,6 +623,16 @@ def remember(state: dict, net: float, dealer: list[str], dealer_total: int) -> N
     del state["recent"][MAX_RECENT:]
 
 
+def elide(name: str) -> str:
+    """A login the width of a column can live with.
+
+    A cell that has to hold 39 characters takes the width from every other
+    column beside it, and on a phone that is the whole table. The link still
+    goes to the account, and the full name is on the link itself.
+    """
+    return name if len(name) <= MAX_NAME else name[:MAX_NAME - 1] + "…"
+
+
 def fitting(names: list[str]) -> tuple[list[str], int]:
     """As many logins as one line has room for, and how many are left over.
 
@@ -955,8 +966,9 @@ def played_by(entry: dict) -> str:
     names = [n for n in entry.get("by", []) if handle(n)]
     if not names:
         return ""
-    fits, rest = fitting(names)
-    shown = [f'<a href="https://github.com/{n}">@{n}</a>' for n in fits]
+    fits, rest = fitting([elide(n) for n in names])
+    shown = [f'<a href="https://github.com/{n}" title="@{n}">@{text}</a>'
+             for n, text in zip(names, fits)]
     if rest:
         shown.append(f"+{rest}")
     return " ".join(shown)
