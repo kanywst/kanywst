@@ -4,3 +4,4 @@ Hand, bet, the player's cards, the dealer's, what the table won, and who played 
       2     5u  K K 20 won  |  dealer K 2 5 17  |  +5u  |  @kanywst
       3    10u  8 3 4 15 lost  |  dealer 2 2 5 K 19  |  -20u  |  @kanywst
       4    10u  9 6 15 lost  |  dealer 6 K A 17  |  -10u  |  @kanywst
+      5     5u  7 8 15 won  |  dealer 4 9 T 23  |  +5u  |  @kanywst
