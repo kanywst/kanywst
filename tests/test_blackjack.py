@@ -431,6 +431,32 @@ class LogFile(Sandbox):
         text = self.close_shoes(bj.MAX_LOG_SHOES)
         self.assertEqual(text.count("\n  shoe "), bj.MAX_LOG_SHOES)
 
+    def test_the_log_says_who_played_the_hand(self):
+        # The table shows three hands; everything before them is only here.
+        state = table(up="2H", cards=("8D", "3H"), bet=10)
+        with stacked("2C", "5S", "KD"):
+            bj.play(state, "stand 7", "kanywst")
+        line = bj.LOG_PATH.read_text(encoding="utf-8").rstrip("\n").split("\n")[-1]
+        self.assertTrue(line.endswith("|  @kanywst"), line)
+        self.assertIn("dealer 2 2 5 K 19", line)
+
+    def test_a_hand_with_no_name_on_it_leaves_no_column_behind(self):
+        state = table(up="2H", cards=("8D", "3H"), bet=10,
+                      hands=[spot(["8D", "3H"], result="lost")])
+        state["hand"]["by"] = []
+        bj.append_log(state, -10.0, ["2H", "2C", "5S", "KD"])
+        line = bj.LOG_PATH.read_text(encoding="utf-8").rstrip("\n").split("\n")[-1]
+        self.assertTrue(line.endswith("-10u"), line)
+
+    def test_every_name_on_a_hand_reaches_the_log(self):
+        # The row has room for two; the record keeps all of them.
+        state = table(up="2H", cards=("8D", "3H"), bet=10,
+                      hands=[spot(["8D", "3H"], result="lost")],
+                      by=["first", "second", "third"])
+        bj.append_log(state, -10.0, ["2H", "2C", "5S", "KD"])
+        line = bj.LOG_PATH.read_text(encoding="utf-8").rstrip("\n").split("\n")[-1]
+        self.assertTrue(line.endswith("@first @second @third"), line)
+
     def test_the_hands_and_the_shoes_share_the_file_without_confusing_it(self):
         # A hand line must never look like the start of a shoe to the trim.
         state = table()

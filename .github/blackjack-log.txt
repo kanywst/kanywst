@@ -1,6 +1,6 @@
 Blackjack played on github.com/kanywst. Newest last.
-Hand, bet, the player's cards, the dealer's, and what the table won.
-      1     2u  7 8 15 won  |  dealer 3 2 K Q 25  |  +2u
-      2     5u  K K 20 won  |  dealer K 2 5 17  |  +5u
-      3    10u  8 3 4 15 lost  |  dealer 2 2 5 K 19  |  -20u
-      4    10u  9 6 15 lost  |  dealer 6 K A 17  |  -10u
+Hand, bet, the player's cards, the dealer's, what the table won, and who played it.
+      1     2u  7 8 15 won  |  dealer 3 2 K Q 25  |  +2u  |  @kanywst
+      2     5u  K K 20 won  |  dealer K 2 5 17  |  +5u  |  @kanywst
+      3    10u  8 3 4 15 lost  |  dealer 2 2 5 K 19  |  -20u  |  @kanywst
+      4    10u  9 6 15 lost  |  dealer 6 K A 17  |  -10u  |  @kanywst
