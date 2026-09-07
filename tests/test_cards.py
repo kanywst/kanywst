@@ -30,7 +30,7 @@ class Art(unittest.TestCase):
     def test_every_image_the_table_can_name_exists(self):
         expected = {f"{rank}{suit}" for rank in make_cards.RANKS for suit in make_cards.SUITS}
         expected |= {"back", "slot", "blank", "label-dealer", "label-you",
-                     "label-you-sel"}
+                     "label-you-sel", "label-player"}
         expected |= {f"chip{value}" for value in make_cards.CHIPS}
         expected |= {f"btn-{label}" for label in make_cards.BUTTONS}
         self.assertEqual({p.stem for p in svg_files()}, expected)

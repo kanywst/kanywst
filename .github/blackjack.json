@@ -74,7 +74,10 @@
    ],
    "dealer_total": 17,
    "insurance": 0,
-   "net": -10.0
+   "net": -10.0,
+   "by": [
+    "kanywst"
+   ]
   },
   {
    "number": 3,
@@ -97,7 +100,10 @@
    ],
    "dealer_total": 19,
    "insurance": 0,
-   "net": -20.0
+   "net": -20.0,
+   "by": [
+    "kanywst"
+   ]
   },
   {
    "number": 2,
@@ -118,7 +124,10 @@
    ],
    "dealer_total": 17,
    "insurance": 0,
-   "net": 5.0
+   "net": 5.0,
+   "by": [
+    "kanywst"
+   ]
   }
  ]
 }

@@ -74,6 +74,9 @@ CHIPS = [1, 2, 5, 10, 25]
 MAX_RECENT = 3         # Hands shown under the table. The rest are in the log.
 MAX_LOG_SHOES = 40     # The oldest shoes fall off first.
 MAX_PLAYERS = 200
+MAX_HANDS_BY = 8       # Accounts kept against one hand. Anyone can click.
+NAME_ROOM = 24         # Characters of login the row has room for, past the first.
+MAX_NAME = 16          # Characters of one login before the row elides it.
 
 RNG = secrets.SystemRandom()
 
@@ -217,6 +220,7 @@ def blank_hand(number: int) -> dict:
         "hole": None,
         "dealer": [],
         "peeked": False,
+        "by": [],
     }
 
 
@@ -265,6 +269,9 @@ def load_state() -> dict:
                 return False
             if any(c not in known for c in h["cards"]):
                 return False
+        by = value.get("by", [])
+        if not isinstance(by, list) or not all(isinstance(n, str) for n in by):
+            return False
         return isinstance(value.get("number"), int) and value["number"] > 0
 
     checks = {
@@ -356,6 +363,35 @@ def coach(state: dict, action: str) -> tuple[str, float]:
     return "\n".join(lines), cost
 
 
+def handle(user: str) -> str:
+    """A GitHub login, or nothing at all.
+
+    The name goes onto the profile page as a link, so only what a login can
+    actually be gets written there: letters, digits and single hyphens, 39
+    characters at most. Anything else is a name the table declines to print,
+    including whatever a hand-edited state file might be holding instead of a
+    string.
+    """
+    if not isinstance(user, str) or len(user) > 39:
+        return ""
+    if re.fullmatch(r"[A-Za-z0-9](?:-?[A-Za-z0-9])*", user):
+        return user
+    return ""
+
+
+def touch(state: dict, user: str) -> None:
+    """Note that this account played the hand on the table.
+
+    The table is a queue of strangers, so a hand is not necessarily one
+    person's: whoever bets it may not be whoever hits it. Kept in the order
+    they arrived, first come first named.
+    """
+    name = handle(user)
+    by = state["hand"].setdefault("by", [])
+    if name and name not in by and len(by) < MAX_HANDS_BY:
+        by.append(name)
+
+
 def player(state: dict, user: str) -> dict:
     """The record kept for one player, made if it is not there.
 
@@ -364,6 +400,7 @@ def player(state: dict, user: str) -> dict:
     and had one. Otherwise the ceiling below would only be applied on the paths
     that happen to reach it, and a public state file would grow past it.
     """
+    touch(state, user)
     who = state["players"].setdefault(user, {"hands": 0, "decisions": 0, "cost": 0.0})
     if len(state["players"]) > MAX_PLAYERS:
         # Only the count is ever shown, and a table played by the whole internet
@@ -585,9 +622,68 @@ def remember(state: dict, net: float, dealer: list[str], dealer_total: int) -> N
         "dealer_total": dealer_total,
         "insurance": hand["insurance"],
         "net": net,
+        "by": list(hand.get("by", [])),
     }
     state["recent"].insert(0, entry)
     del state["recent"][MAX_RECENT:]
+
+
+def elide(name: str) -> str:
+    """A login the width of a column can live with.
+
+    A cell that has to hold 39 characters takes the width from every other
+    column beside it, and on a phone that is the whole table. The link still
+    goes to the account, and the full name is on the link itself.
+    """
+    return name if len(name) <= MAX_NAME else name[:MAX_NAME - 1] + "…"
+
+
+def names_in(entry: dict) -> list[str]:
+    """The logins on a settled hand, whatever the state file actually holds.
+
+    The hand being played is validated on the way in; the hands behind it are
+    only checked as a list, so this is where a file somebody edited by hand
+    stops. A row that raises would take the whole table down with it.
+    """
+    by = entry.get("by", [])
+    if not isinstance(by, list):
+        return []
+    return [n for n in by if handle(n)]
+
+
+def fitting(names: list[str]) -> tuple[list[str], int]:
+    """As many logins as one line has room for, and how many are left over.
+
+    Measured in characters rather than in names because a login can be 39 of
+    them, and the line they go on — a table row, a sentence — is not this
+    table's page. First come, first named.
+    """
+    shown, room = [], NAME_ROOM
+    for name in names:
+        if shown and len(name) + 1 > room:
+            break
+        room -= len(name) + 1
+        shown.append(name)
+    return shown, len(names) - len(shown)
+
+
+def names_of(entry: dict) -> str:
+    """The accounts that played a settled hand, as a sentence says them.
+
+    Plain text rather than links: the same sentence is posted back as the
+    comment on the issue that played the hand, where a bare @name is already
+    the account.
+    """
+    names = names_in(entry)
+    if not names:
+        return ""
+    shown, rest = fitting(names)
+    parts = [f"@{n}" for n in shown]
+    if rest:
+        parts.append(f"{rest} other{'' if rest == 1 else 's'}")
+    if len(parts) == 1:
+        return parts[0]
+    return ", ".join(parts[:-1]) + " and " + parts[-1]
 
 
 def describe_result(entry: dict) -> str:
@@ -614,13 +710,18 @@ def describe_result(entry: dict) -> str:
     else:
         money_text = "it ended level"
 
+    # The hand is over, so the person who played it is a name, not a "you":
+    # the sentence sits on a profile page that anybody reads. A hand with no
+    # name on it — one played before the table kept them — keeps the pronoun.
+    who = names_of(entry)
     if entry["hands"][0]["result"] == "surrendered":
-        mine = f"you gave up {totals}"
+        mine = f"{who} gave up {totals}" if who else f"you gave up {totals}"
     elif doubled:
         # Naming the double is what explains a hand that cost twice its chip.
-        mine = f"your double came to {totals}"
+        mine = (f"{who}'s double came to {totals}" if who
+                else f"your double came to {totals}")
     else:
-        mine = f"you had {totals}"
+        mine = f"{who} had {totals}" if who else f"you had {totals}"
     return f"Hand {entry['number']}: the dealer {dealer_text}, {mine}, and {money_text}."
 
 
@@ -871,6 +972,26 @@ def stats_line(state: dict) -> str:
     return centre(" · ".join(parts))
 
 
+def played_by(entry: dict) -> str:
+    """Who took the hand, linked to the account that took it.
+
+    A row that says "you" to everyone who reads the profile names nobody: the
+    person at the table was one particular account, and the visitor reading it
+    is usually not them. The rest are counted rather than named, because a
+    column that grows with the queue stops being a column — and a login can be
+    39 characters, so what fits is measured in characters and not in names.
+    """
+    names = names_in(entry)
+    if not names:
+        return ""
+    fits, rest = fitting([elide(n) for n in names])
+    shown = [f'<a href="https://github.com/{n}" title="@{n}">@{text}</a>'
+             for n, text in zip(names, fits)]
+    if rest:
+        shown.append(f"+{rest}")
+    return " ".join(shown)
+
+
 def recent_table(state: dict) -> list[str]:
     if not state["recent"]:
         return []
@@ -884,15 +1005,17 @@ def recent_table(state: dict) -> list[str]:
         total = entry["dealer_total"]
         shown = ("blackjack" if is_natural(dealer) else
                  (f"{total} bust" if total > 21 else str(total)))
+        who = played_by(entry)
         rows.append(
-            f"    <tr><td><code>{entry['number']}</code></td><td>{mine}</td>"
+            f"    <tr><td><code>{entry['number']}</code>{' ' + who if who else ''}</td>"
+            f"<td>{mine}</td>"
             f"<td>{shown} ({ranks_of(dealer)})</td>"
             f"<td><code>{money(entry['net'], signed=True)}</code></td></tr>"
         )
     return [
         '<table align="center">',
         "  <thead>",
-        "    <tr><th>Hand</th><th>You</th><th>Dealer</th><th></th></tr>",
+        "    <tr><th>Hand</th><th>Player</th><th>Dealer</th><th></th></tr>",
         "  </thead>",
         "  <tbody>",
         *rows,
@@ -936,7 +1059,7 @@ def replay(state: dict) -> str:
     rows = [felt_row([img("label-dealer", "dealer")]
                      + [card_img(c) for c in entry["dealer"]], width)]
     for spot in entry["hands"]:
-        rows.append(felt_row([img("label-you", "you")]
+        rows.append(felt_row([img("label-player", "player")]
                              + [card_img(c) for c in spot["cards"]], width))
     return felt(rows)
 

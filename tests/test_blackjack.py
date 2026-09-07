@@ -14,6 +14,7 @@ about what happens on a split ace.
 """
 
 import contextlib
+import json
 import pathlib
 import re
 import sys
@@ -76,6 +77,23 @@ def table(up="7D", cards=("TH", "6C"), bet=2, phase="player", **kw):
     })
     state["hand"].update(kw)
     state["shoe"]["seen"] = [up, *cards]
+    return state
+
+
+def settled(by=("someone",), **kw):
+    """A table between hands, with the hand that just ended still on the felt."""
+    state = bj.blank_state()
+    state["hand"] = bj.blank_hand(8)
+    entry = {
+        "number": 7, "bet": 10,
+        "hands": [{"cards": ["8D", "3H", "4C"], "result": "lost"}],
+        "dealer": ["2H", "2C", "5S", "KD"], "dealer_total": 19,
+        "insurance": 0, "net": -20.0, "by": list(by),
+    }
+    entry.update(kw)
+    state["recent"] = [entry]
+    state["hands_played"] = 1
+    state["result"] = -20.0
     return state
 
 
@@ -229,6 +247,40 @@ class Insurance(Sandbox):
         with coin(0.99), stacked("7C"):
             bj.play(state, "ins yes 7", "someone")
         self.assertLess(state["coach"]["cost"], 0)
+
+
+class StateFile(Sandbox):
+    """The file is public, editable by hand, and read again on every click. A
+    hand that comes back malformed must cost one hand, not the table."""
+
+    def test_a_hand_whose_names_are_not_names_is_dealt_again(self):
+        stored = bj.blank_state()
+        stored["hand"]["number"] = 12
+        stored["hand"]["by"] = [123]
+        bj.STATE_PATH.write_text(json.dumps(stored), encoding="utf-8")
+        state = bj.load_state()
+        self.assertEqual(state["hand"]["by"], [])
+        self.assertEqual(state["hand"]["number"], 1)
+
+    def test_a_name_that_is_not_a_string_is_not_drawn(self):
+        # The settled hands are only checked as a list, so the renderer is the
+        # thing that has to hold: a row that raises takes down write_readme.
+        state = settled(by=(123, "kanywst"))
+        row = "\n".join(bj.recent_table(state))
+        self.assertIn("@kanywst", row)
+        self.assertNotIn("123", row)
+        self.assertIn("@kanywst had 15", bj.headline(state))
+
+    def test_a_settled_hand_whose_names_are_not_a_list_is_drawn_anyway(self):
+        # A string would otherwise be iterated one character at a time, and a
+        # number would raise where the table is being drawn.
+        for by in ("kanywst", 123, None, {"kanywst": 1}):
+            with self.subTest(by=by):
+                state = settled()
+                state["recent"][0]["by"] = by
+                row = "\n".join(bj.recent_table(state))
+                self.assertNotIn("@", row)
+                self.assertIn("you had 15", bj.headline(state))
 
 
 class Secrets(Sandbox):
@@ -447,6 +499,7 @@ class Markup(Sandbox):
             table(up="AS", phase="insurance"),
             table(cards=("8S", "3H"), hands=[spot(["8S", "3H"]), spot(["8D", "2C"])]),
             bj.blank_state(),
+            settled(),
         ]
         for state in states:
             for name in re.findall(r"/cards/([^.]+)\.svg", self.rendered(state)):
@@ -516,7 +569,7 @@ class Markup(Sandbox):
         line = bj.headline(state)
         self.assertIn("Hand 7: the dealer", line)
         self.assertIn("the dealer had 19", line)
-        self.assertIn("your double came to 15", line)
+        self.assertIn("@someone's double came to 15", line)
         self.assertIn("it cost 20u", line)
         # And the table says what to press next, which is the one moment where
         # the thing to click is not obviously a button.
@@ -579,6 +632,101 @@ class Markup(Sandbox):
         self.assertIn("24 bust (T 6 8)", html)
         self.assertIn("17 (T 7)", html)
         self.assertIn("-2u", html)
+
+    def test_the_table_names_the_account_that_played_the_hand(self):
+        # "You" names nobody: whoever reads the profile is almost never whoever
+        # was sitting at the table.
+        state = table(up="2H", cards=("8D", "3H"), bet=10)
+        with stacked("2C", "5S", "KD"):
+            bj.play(state, "stand 7", "kanywst")
+        html = self.rendered(state)
+        self.assertIn('href="https://github.com/kanywst"', html)
+        self.assertIn(">@kanywst</a>", html)
+        self.assertNotIn("<th>You</th>", html)
+
+    def test_a_hand_two_accounts_played_names_them_both(self):
+        state = table(up="2H", cards=("8D", "3H"), bet=10)
+        bj.touch(state, "dealt-it")
+        with stacked("2C", "5S", "KD"):
+            bj.play(state, "stand 7", "stood-on-it")
+        html = self.rendered(state)
+        self.assertIn("@dealt-it", html)
+        self.assertIn("@stood-on-it", html)
+
+    def test_a_name_that_is_not_a_login_is_never_printed(self):
+        # The name arrives from an issue and lands on the profile as a link.
+        state = table(up="2H", cards=("8D", "3H"), bet=10)
+        with stacked("2C", "5S", "KD"):
+            bj.play(state, "stand 7", '"><img src=x onerror=alert(1)>')
+        html = self.rendered(state)
+        self.assertNotIn("<img src=x", html)
+        self.assertNotIn("onerror", html)
+        self.assertEqual(state["recent"][0]["by"], [])
+
+    def test_only_a_login_shaped_name_is_a_login(self):
+        for name in ("kanywst", "a", "a-b", "9", "x" * 39):
+            with self.subTest(name):
+                self.assertEqual(bj.handle(name), name)
+        for name in ("-lead", "trail-", "double--hyphen", "sp ace", "dot.dot",
+                     "x" * 40, "a-" * 30 + "b", "", 12, None, ["kanywst"]):
+            with self.subTest(name):
+                self.assertEqual(bj.handle(name), "")
+
+    def test_the_settled_hand_is_told_with_the_name_that_played_it(self):
+        state = settled(by=("kanywst",))
+        line = bj.headline(state)
+        self.assertIn("@kanywst had 15", line)
+        self.assertNotIn("you had", line)
+
+    def test_two_accounts_on_one_settled_hand_are_both_told(self):
+        line = bj.headline(settled(by=("first", "second")))
+        self.assertIn("@first and @second had 15", line)
+
+    def test_a_hand_played_before_the_table_kept_names_keeps_the_pronoun(self):
+        # The entries written by earlier versions have no name on them, and a
+        # sentence with a hole in it is worse than a pronoun.
+        line = bj.headline(settled(by=()))
+        self.assertIn("you had 15", line)
+
+    def test_the_felt_between_hands_does_not_call_the_reader_the_player(self):
+        # The hand still on the felt belongs to whoever played it, and the
+        # sentence under it says who. "You" there addresses the wrong person.
+        html = bj.render(settled(by=("kanywst",)))
+        self.assertIn("label-player.svg", html)
+        self.assertIn('alt="player"', html)
+        self.assertNotIn("label-you", html)
+        self.assertIn("label-dealer.svg", html)
+
+    def test_the_names_on_one_hand_stop_at_what_the_column_holds(self):
+        state = table(up="2H", cards=("8D", "3H"), bet=10)
+        for i in range(5):
+            bj.touch(state, f"player-{i}")
+        with stacked("2C", "5S", "KD"):
+            bj.play(state, "stand 7", "player-5")
+        html = self.rendered(state)
+        self.assertIn("@player-0", html)
+        self.assertIn("@player-1", html)
+        self.assertNotIn("@player-2", html)
+        self.assertIn("+4", html)
+
+    def test_one_long_login_takes_the_whole_row_to_itself(self):
+        # A login can be 39 characters. Two of them side by side would double
+        # the width of the table on a page that is mostly not this table.
+        long_names = ["a" * 39, "b" * 39]
+        state = table(up="2H", cards=("8D", "3H"), bet=10, by=long_names[:1])
+        with stacked("2C", "5S", "KD"):
+            bj.play(state, "stand 7", long_names[1])
+        row = "\n".join(bj.recent_table(state))
+        self.assertNotIn(long_names[1], row)
+        self.assertIn("+1", row)
+        # The name is cut to what the column can hold, and the link still goes
+        # to the account it was cut from.
+        self.assertIn(f'href="https://github.com/{long_names[0]}"', row)
+        self.assertIn(f'title="@{long_names[0]}"', row)
+        self.assertIn("…</a>", row)
+        self.assertNotIn(f">@{long_names[0]}<", row)
+        # And the sentence under the felt counts the second one too.
+        self.assertIn("and 1 other had 11", bj.headline(state))
 
 
 if __name__ == "__main__":
