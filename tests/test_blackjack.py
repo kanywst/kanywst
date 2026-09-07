@@ -664,6 +664,20 @@ class Markup(Sandbox):
         self.assertNotIn("@player-2", html)
         self.assertIn("+4", html)
 
+    def test_one_long_login_takes_the_whole_row_to_itself(self):
+        # A login can be 39 characters. Two of them side by side would double
+        # the width of the table on a page that is mostly not this table.
+        long_names = ["a" * 39, "b" * 39]
+        state = table(up="2H", cards=("8D", "3H"), bet=10, by=long_names[:1])
+        with stacked("2C", "5S", "KD"):
+            bj.play(state, "stand 7", long_names[1])
+        row = "\n".join(bj.recent_table(state))
+        self.assertIn("@" + long_names[0], row)
+        self.assertNotIn("@" + long_names[1], row)
+        self.assertIn("+1", row)
+        # And the sentence under the felt counts the second one too.
+        self.assertIn("and 1 other had 11", bj.headline(state))
+
 
 if __name__ == "__main__":
     unittest.main()

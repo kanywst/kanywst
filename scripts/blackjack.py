@@ -75,7 +75,7 @@ MAX_RECENT = 3         # Hands shown under the table. The rest are in the log.
 MAX_LOG_SHOES = 40     # The oldest shoes fall off first.
 MAX_PLAYERS = 200
 MAX_HANDS_BY = 8       # Accounts kept against one hand. Anyone can click.
-MAX_NAMED = 2          # Of those, the ones the table has room to name.
+NAME_ROOM = 24         # Characters of login the row has room for, past the first.
 
 RNG = secrets.SystemRandom()
 
@@ -622,6 +622,22 @@ def remember(state: dict, net: float, dealer: list[str], dealer_total: int) -> N
     del state["recent"][MAX_RECENT:]
 
 
+def fitting(names: list[str]) -> tuple[list[str], int]:
+    """As many logins as one line has room for, and how many are left over.
+
+    Measured in characters rather than in names because a login can be 39 of
+    them, and the line they go on — a table row, a sentence — is not this
+    table's page. First come, first named.
+    """
+    shown, room = [], NAME_ROOM
+    for name in names:
+        if shown and len(name) + 1 > room:
+            break
+        room -= len(name) + 1
+        shown.append(name)
+    return shown, len(names) - len(shown)
+
+
 def names_of(entry: dict) -> str:
     """The accounts that played a settled hand, as a sentence says them.
 
@@ -629,14 +645,16 @@ def names_of(entry: dict) -> str:
     comment on the issue that played the hand, where a bare @name is already
     the account.
     """
-    names = [f"@{n}" for n in entry.get("by", []) if handle(n)]
+    names = [n for n in entry.get("by", []) if handle(n)]
     if not names:
         return ""
-    if len(names) == 1:
-        return names[0]
-    if len(names) == 2:
-        return f"{names[0]} and {names[1]}"
-    return f"{names[0]} and {len(names) - 1} others"
+    shown, rest = fitting(names)
+    parts = [f"@{n}" for n in shown]
+    if rest:
+        parts.append(f"{rest} other{'' if rest == 1 else 's'}")
+    if len(parts) == 1:
+        return parts[0]
+    return ", ".join(parts[:-1]) + " and " + parts[-1]
 
 
 def describe_result(entry: dict) -> str:
@@ -930,14 +948,15 @@ def played_by(entry: dict) -> str:
 
     A row that says "you" to everyone who reads the profile names nobody: the
     person at the table was one particular account, and the visitor reading it
-    is usually not them. Past the first couple the rest are counted, because a
-    column that grows with the queue stops being a column.
+    is usually not them. The rest are counted rather than named, because a
+    column that grows with the queue stops being a column — and a login can be
+    39 characters, so what fits is measured in characters and not in names.
     """
     names = [n for n in entry.get("by", []) if handle(n)]
     if not names:
         return ""
-    shown = [f'<a href="https://github.com/{n}">@{n}</a>' for n in names[:MAX_NAMED]]
-    rest = len(names) - len(shown)
+    fits, rest = fitting(names)
+    shown = [f'<a href="https://github.com/{n}">@{n}</a>' for n in fits]
     if rest:
         shown.append(f"+{rest}")
     return " ".join(shown)
