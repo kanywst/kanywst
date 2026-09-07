@@ -638,6 +638,19 @@ def elide(name: str) -> str:
     return name if len(name) <= MAX_NAME else name[:MAX_NAME - 1] + "…"
 
 
+def names_in(entry: dict) -> list[str]:
+    """The logins on a settled hand, whatever the state file actually holds.
+
+    The hand being played is validated on the way in; the hands behind it are
+    only checked as a list, so this is where a file somebody edited by hand
+    stops. A row that raises would take the whole table down with it.
+    """
+    by = entry.get("by", [])
+    if not isinstance(by, list):
+        return []
+    return [n for n in by if handle(n)]
+
+
 def fitting(names: list[str]) -> tuple[list[str], int]:
     """As many logins as one line has room for, and how many are left over.
 
@@ -661,7 +674,7 @@ def names_of(entry: dict) -> str:
     comment on the issue that played the hand, where a bare @name is already
     the account.
     """
-    names = [n for n in entry.get("by", []) if handle(n)]
+    names = names_in(entry)
     if not names:
         return ""
     shown, rest = fitting(names)
@@ -968,7 +981,7 @@ def played_by(entry: dict) -> str:
     column that grows with the queue stops being a column — and a login can be
     39 characters, so what fits is measured in characters and not in names.
     """
-    names = [n for n in entry.get("by", []) if handle(n)]
+    names = names_in(entry)
     if not names:
         return ""
     fits, rest = fitting([elide(n) for n in names])

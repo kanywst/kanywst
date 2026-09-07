@@ -271,6 +271,17 @@ class StateFile(Sandbox):
         self.assertNotIn("123", row)
         self.assertIn("@kanywst had 15", bj.headline(state))
 
+    def test_a_settled_hand_whose_names_are_not_a_list_is_drawn_anyway(self):
+        # A string would otherwise be iterated one character at a time, and a
+        # number would raise where the table is being drawn.
+        for by in ("kanywst", 123, None, {"kanywst": 1}):
+            with self.subTest(by=by):
+                state = settled()
+                state["recent"][0]["by"] = by
+                row = "\n".join(bj.recent_table(state))
+                self.assertNotIn("@", row)
+                self.assertIn("you had 15", bj.headline(state))
+
 
 class Secrets(Sandbox):
     """The state file is public. What is in it is what anyone can read before
