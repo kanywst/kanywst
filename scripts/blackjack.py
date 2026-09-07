@@ -622,6 +622,23 @@ def remember(state: dict, net: float, dealer: list[str], dealer_total: int) -> N
     del state["recent"][MAX_RECENT:]
 
 
+def names_of(entry: dict) -> str:
+    """The accounts that played a settled hand, as a sentence says them.
+
+    Plain text rather than links: the same sentence is posted back as the
+    comment on the issue that played the hand, where a bare @name is already
+    the account.
+    """
+    names = [f"@{n}" for n in entry.get("by", []) if handle(n)]
+    if not names:
+        return ""
+    if len(names) == 1:
+        return names[0]
+    if len(names) == 2:
+        return f"{names[0]} and {names[1]}"
+    return f"{names[0]} and {len(names) - 1} others"
+
+
 def describe_result(entry: dict) -> str:
     """One sentence for a hand that is over.
 
@@ -646,13 +663,18 @@ def describe_result(entry: dict) -> str:
     else:
         money_text = "it ended level"
 
+    # The hand is over, so the person who played it is a name, not a "you":
+    # the sentence sits on a profile page that anybody reads. A hand with no
+    # name on it — one played before the table kept them — keeps the pronoun.
+    who = names_of(entry)
     if entry["hands"][0]["result"] == "surrendered":
-        mine = f"you gave up {totals}"
+        mine = f"{who} gave up {totals}" if who else f"you gave up {totals}"
     elif doubled:
         # Naming the double is what explains a hand that cost twice its chip.
-        mine = f"your double came to {totals}"
+        mine = (f"{who}'s double came to {totals}" if who
+                else f"your double came to {totals}")
     else:
-        mine = f"you had {totals}"
+        mine = f"{who} had {totals}" if who else f"you had {totals}"
     return f"Hand {entry['number']}: the dealer {dealer_text}, {mine}, and {money_text}."
 
 
@@ -988,7 +1010,7 @@ def replay(state: dict) -> str:
     rows = [felt_row([img("label-dealer", "dealer")]
                      + [card_img(c) for c in entry["dealer"]], width)]
     for spot in entry["hands"]:
-        rows.append(felt_row([img("label-you", "you")]
+        rows.append(felt_row([img("label-player", "player")]
                              + [card_img(c) for c in spot["cards"]], width))
     return felt(rows)
 

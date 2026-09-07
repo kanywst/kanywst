@@ -79,6 +79,23 @@ def table(up="7D", cards=("TH", "6C"), bet=2, phase="player", **kw):
     return state
 
 
+def settled(by=("someone",), **kw):
+    """A table between hands, with the hand that just ended still on the felt."""
+    state = bj.blank_state()
+    state["hand"] = bj.blank_hand(8)
+    entry = {
+        "number": 7, "bet": 10,
+        "hands": [{"cards": ["8D", "3H", "4C"], "result": "lost"}],
+        "dealer": ["2H", "2C", "5S", "KD"], "dealer_total": 19,
+        "insurance": 0, "net": -20.0, "by": list(by),
+    }
+    entry.update(kw)
+    state["recent"] = [entry]
+    state["hands_played"] = 1
+    state["result"] = -20.0
+    return state
+
+
 class Sandbox(unittest.TestCase):
     """Keep the repo's own README, state and log out of every test."""
 
@@ -447,6 +464,7 @@ class Markup(Sandbox):
             table(up="AS", phase="insurance"),
             table(cards=("8S", "3H"), hands=[spot(["8S", "3H"]), spot(["8D", "2C"])]),
             bj.blank_state(),
+            settled(),
         ]
         for state in states:
             for name in re.findall(r"/cards/([^.]+)\.svg", self.rendered(state)):
@@ -516,7 +534,7 @@ class Markup(Sandbox):
         line = bj.headline(state)
         self.assertIn("Hand 7: the dealer", line)
         self.assertIn("the dealer had 19", line)
-        self.assertIn("your double came to 15", line)
+        self.assertIn("@someone's double came to 15", line)
         self.assertIn("it cost 20u", line)
         # And the table says what to press next, which is the one moment where
         # the thing to click is not obviously a button.
@@ -608,6 +626,31 @@ class Markup(Sandbox):
         self.assertNotIn("<img src=x", html)
         self.assertNotIn("onerror", html)
         self.assertEqual(state["recent"][0]["by"], [])
+
+    def test_the_settled_hand_is_told_with_the_name_that_played_it(self):
+        state = settled(by=("kanywst",))
+        line = bj.headline(state)
+        self.assertIn("@kanywst had 15", line)
+        self.assertNotIn("you had", line)
+
+    def test_two_accounts_on_one_settled_hand_are_both_told(self):
+        line = bj.headline(settled(by=("first", "second")))
+        self.assertIn("@first and @second had 15", line)
+
+    def test_a_hand_played_before_the_table_kept_names_keeps_the_pronoun(self):
+        # The entries written by earlier versions have no name on them, and a
+        # sentence with a hole in it is worse than a pronoun.
+        line = bj.headline(settled(by=()))
+        self.assertIn("you had 15", line)
+
+    def test_the_felt_between_hands_does_not_call_the_reader_the_player(self):
+        # The hand still on the felt belongs to whoever played it, and the
+        # sentence under it says who. "You" there addresses the wrong person.
+        html = bj.render(settled(by=("kanywst",)))
+        self.assertIn("label-player.svg", html)
+        self.assertIn('alt="player"', html)
+        self.assertNotIn("label-you", html)
+        self.assertIn("label-dealer.svg", html)
 
     def test_the_names_on_one_hand_stop_at_what_the_column_holds(self):
         state = table(up="2H", cards=("8D", "3H"), bet=10)

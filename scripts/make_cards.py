@@ -248,6 +248,10 @@ def main() -> None:
     write("label-dealer", seat("dealer"))
     write("label-you", seat("you"))
     write("label-you-sel", seat("you", active=True))
+    # The hand on the felt between deals belongs to whoever played it, and the
+    # sentence under it says which account that was. "You" on that row would be
+    # addressing a reader who was not there.
+    write("label-player", seat("player"))
 
     print(f"wrote {written} files to {OUT}")
 
