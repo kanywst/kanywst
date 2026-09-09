@@ -457,6 +457,48 @@ class LogFile(Sandbox):
         line = bj.LOG_PATH.read_text(encoding="utf-8").rstrip("\n").split("\n")[-1]
         self.assertTrue(line.endswith("@first @second @third"), line)
 
+    def test_a_doubled_hand_says_what_it_had_riding(self):
+        # The chip that went down was ten and the hand cost twenty. A row that
+        # only shows the chip reads like the table pays a loss at two to one.
+        state = table(up="2H", cards=("8D", "3H", "4C"), bet=10,
+                      hands=[spot(["8D", "3H", "4C"], bet=20, doubled=True,
+                                  result="lost")])
+        bj.append_log(state, -20.0, ["2H", "2C", "5S", "KD"])
+        line = bj.LOG_PATH.read_text(encoding="utf-8").rstrip("\n").split("\n")[-1]
+        self.assertIn("10->20u", line)
+
+    def test_a_split_counts_every_chip_on_the_felt(self):
+        state = table(up="2H", cards=("8D", "8H"), bet=10,
+                      hands=[spot(["8D", "3H"], bet=10, result="lost"),
+                             spot(["8H", "4C"], bet=10, result="lost")])
+        bj.append_log(state, -20.0, ["2H", "2C", "5S", "KD"])
+        line = bj.LOG_PATH.read_text(encoding="utf-8").rstrip("\n").split("\n")[-1]
+        self.assertIn("10->20u", line)
+
+    def test_a_hand_that_stayed_at_its_chip_shows_one_number(self):
+        state = table(up="2H", cards=("8D", "3H"), bet=10,
+                      hands=[spot(["8D", "3H"], bet=10, result="lost")])
+        bj.append_log(state, -10.0, ["2H", "2C", "5S", "KD"])
+        line = bj.LOG_PATH.read_text(encoding="utf-8").rstrip("\n").split("\n")[-1]
+        self.assertIn("10u  8 3 11 lost", line)
+        self.assertNotIn("->", line)
+
+    def test_insurance_gets_its_own_field_when_it_was_taken(self):
+        # Ten on the hand and five on the hole card: the hand loses both, and
+        # -15u on a row that only says 10u is a result nobody can check.
+        state = table(up="AS", cards=("8D", "3H"), bet=10, insurance=5.0,
+                      hands=[spot(["8D", "3H"], bet=10, result="lost")])
+        bj.append_log(state, -15.0, ["AS", "KD"])
+        line = bj.LOG_PATH.read_text(encoding="utf-8").rstrip("\n").split("\n")[-1]
+        self.assertIn("|  ins 5u  |  -15u", line)
+
+    def test_a_hand_that_declined_insurance_carries_no_field_for_it(self):
+        state = table(up="2H", cards=("8D", "3H"), bet=10,
+                      hands=[spot(["8D", "3H"], bet=10, result="lost")])
+        bj.append_log(state, -10.0, ["2H", "2C", "5S", "KD"])
+        line = bj.LOG_PATH.read_text(encoding="utf-8").rstrip("\n").split("\n")[-1]
+        self.assertNotIn("ins", line)
+
     def test_the_hands_and_the_shoes_share_the_file_without_confusing_it(self):
         # A hand line must never look like the start of a shoe to the trim.
         state = table()
