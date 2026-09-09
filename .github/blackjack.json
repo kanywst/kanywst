@@ -31,7 +31,8 @@
    "TH",
    "QD",
    "8C",
-   "6D"
+   "6D",
+   "AS"
   ],
   "number": 1
  },
@@ -44,7 +45,8 @@
    {
     "cards": [
      "QD",
-     "6D"
+     "6D",
+     "AS"
     ],
     "bet": 10.0,
     "doubled": false,
@@ -66,12 +68,12 @@
  "hands_played": 5,
  "coach": {
   "cost": 0.0,
-  "decisions": 5
+  "decisions": 6
  },
  "players": {
   "kanywst": {
    "hands": 6,
-   "decisions": 5,
+   "decisions": 6,
    "cost": 0.0
   }
  },
