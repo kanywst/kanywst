@@ -734,16 +734,35 @@ def reshuffle(state: dict) -> None:
     state["shoe"] = {"seen": [], "number": state["shoe"]["number"] + 1}
 
 
-def money(amount: float, signed: bool = False) -> str:
+def bare(amount: float, signed: bool = False) -> str:
     sign = "+" if signed and amount > 0 else ("-" if amount < 0 else "")
     value = abs(amount)
     body = f"{value:,.1f}".rstrip("0").rstrip(".")
-    return f"{sign}{body}u"
+    return f"{sign}{body}"
+
+
+def money(amount: float, signed: bool = False) -> str:
+    return f"{bare(amount, signed)}u"
 
 
 # --------------------------------------------------------------------------
 # The log
 # --------------------------------------------------------------------------
+
+def wagered(hand: dict) -> str:
+    """The bet column: the chip that went down, and what it grew to.
+
+    A double or a split puts money on the felt after the bet was made, so the
+    chip alone cannot explain a hand that cost twice it. Both numbers are kept
+    rather than one — the first is what was bet at the count, which is the only
+    number worth reading down the page, and the second is what was riding when
+    the hand settled, which is the one the result has to agree with.
+    """
+    total = sum(s["bet"] for s in hand["hands"])
+    if total == hand["bet"]:
+        return money(total)
+    return f"{bare(hand['bet'])}->{money(total)}"
+
 
 def append_log(state: dict, net: float, dealer: list[str]) -> None:
     hand = state["hand"]
@@ -751,9 +770,16 @@ def append_log(state: dict, net: float, dealer: list[str]) -> None:
         f"{ranks_of(s['cards'])} {hand_total(s['cards'])} {s['result']}"
         for s in hand["hands"]
     )
-    line = (f"  {hand['number']:>5}  {money(hand['bet']):>5}  {hands}"
-            f"  |  dealer {ranks_of(dealer)} {hand_total(dealer)}"
-            f"  |  {money(net, signed=True)}")
+    fields = [f"dealer {ranks_of(dealer)} {hand_total(dealer)}"]
+    # Insurance is a bet on the hole card, not on the hand, so it stays out of
+    # the bet column and gets a field of its own — but it still moves the money,
+    # and a row whose result nothing on it can account for is a row nobody can
+    # check. It is only here on the hands that took it.
+    if hand["insurance"]:
+        fields.append(f"ins {money(hand['insurance'])}")
+    fields.append(money(net, signed=True))
+    line = f"  {hand['number']:>5}  {wagered(hand):>7}  {hands}"
+    line += "".join(f"  |  {field}" for field in fields)
     # Last, and only when there is one: a login can be 39 characters and the
     # columns before it are read down the page. Every name, not the two a row
     # has room for — this is the record, and it is the only place the hands
@@ -768,8 +794,10 @@ def append_log(state: dict, net: float, dealer: list[str]) -> None:
 
 def header() -> str:
     return ("Blackjack played on github.com/kanywst. Newest last.\n"
-            "Hand, bet, the player's cards, the dealer's, what the table won,"
-            " and who played it.\n")
+            "Hand, bet, the player's cards, the dealer's, any insurance,"
+            " what the table won, and who played it.\n"
+            "A bet written a->b was doubled or split: a went down on the deal,"
+            " b was riding at the end.\n")
 
 
 def log_shoe(state: dict) -> None:
