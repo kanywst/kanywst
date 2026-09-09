@@ -1,8 +1,8 @@
 name: Claude review
 
-# CI answers "does it build and do the tests pass". This asks the question no
-# script here can. It reviews, it does not gate: nothing here is a required
-# check.
+# checks.yml answers "do the tests pass and is the generated output committed".
+# This asks the question no script here can. It reviews, it does not gate:
+# nothing here is a required check.
 #
 # The action refuses to run when this file differs from the copy on the default
 # branch, so a pull request cannot rewrite its own reviewer. The cost is that
@@ -67,34 +67,45 @@ jobs:
             REPO: ${{ github.repository }}
             PR: ${{ github.event.pull_request.number }}
 
-            This is the GitHub profile repository. The readme is prose plus a guest book
-            table that .github/workflows/guestbook.yml regenerates from issues via
-            scripts/update_guestbook.py.
+            This is the GitHub profile repository. The readme is prose plus two blocks that
+            workflows regenerate from issues: a guest book
+            (.github/workflows/guestbook.yml, scripts/update_guestbook.py) and a blackjack
+            table anyone on the internet can play by clicking a link
+            (.github/workflows/blackjack.yml, scripts/blackjack.py, scripts/bjmath.py,
+            state in .github/blackjack.json and .github/blackjack-log.txt).
 
-            There is no CI here beyond the guest book workflow, so this review is the only
-            check.
+            checks.yml already runs the tests, markdownlint, and the two regeneration
+            checks, so do not spend the review on what a script has answered. Read the diff
+            for what only a reader can catch, and only against the parts it touches:
 
-            Look for what only a reader can catch:
+            1. Untrusted input reaching the readme or the state. An issue title and the
+               login that opened it are written by anyone, and both are interpolated into
+               HTML on a public page and stored in a committed JSON file that the next run
+               reads back. Escape it, bound its length, and treat everything loaded from the
+               state file as hostile — it is only as trustworthy as the run that wrote it.
 
-            1. Untrusted input reaching the readme. A guest book entry is written by anyone
-               who opens an issue, and it is interpolated into HTML in a public page. Escape
-               the user name and the message, keep the length bound, and neutralise anything
-               that could close a tag or break the table.
+            2. The marker contracts. Each script rewrites only what sits between its own
+               START and END markers. A change to a marker, or content moved across one,
+               means a workflow either clobbers hand-written prose or stops updating.
 
-            2. The marker contract. The script rewrites only what sits between
-               GUESTBOOK:START and GUESTBOOK:END. A change to the markers, or content moved
-               across them, means the workflow either clobbers hand-written prose or stops
-               updating.
-
-            3. Workflow permissions. The job writes to the default branch on an issue event,
-               so its token scope and its trigger conditions decide who can cause a commit.
+            3. Workflow permissions and triggers. These jobs commit to the default branch on
+               an issue event, so the token scope and the trigger conditions decide who can
+               cause a commit and what it can touch.
 
             4. Image URLs. This readme renders at github.com/kanywst rather than in the
                repository, so a relative image path resolves against the wrong base and
                silently fails to load.
 
-            5. Anything that has to be updated by hand. A count or a list in this file will
-               go stale, and a live link is nearly always available instead.
+            5. The game being right, when the diff touches it. Settlement pays 3:2 on a
+               natural and 1:1 otherwise, insurance 2:1; a double or a split changes what is
+               at risk after the bet was made. The shoe is stored as the cards that have
+               come out of it, the hole card is not drawn until it is turned over, and
+               nothing may tell a player the count before the bet. Money that a row cannot
+               account for is a bug even when the arithmetic is right.
+
+            6. Anything that has to be updated by hand. A count or a list in a file that a
+               workflow also writes will go stale, and a live link or a derived number is
+               nearly always available instead.
 
             Post findings as inline comments on the lines they concern. Use one
             top-level comment for the summary. Be specific and cite
