@@ -36,7 +36,8 @@
    "JD",
    "7S",
    "AC",
-   "8S"
+   "8S",
+   "5S"
   ],
   "number": 1
  },
@@ -49,7 +50,8 @@
    {
     "cards": [
      "7S",
-     "8S"
+     "8S",
+     "5S"
     ],
     "bet": 25.0,
     "doubled": false,
@@ -71,12 +73,12 @@
  "hands_played": 6,
  "coach": {
   "cost": 0.0,
-  "decisions": 8
+  "decisions": 9
  },
  "players": {
   "kanywst": {
    "hands": 7,
-   "decisions": 8,
+   "decisions": 9,
    "cost": 0.0
   }
  },
