@@ -42,7 +42,7 @@
  },
  "hand": {
   "number": 7,
-  "phase": "insurance",
+  "phase": "player",
   "bet": 25.0,
   "insurance": 0,
   "hands": [
@@ -62,7 +62,7 @@
   "up": "AC",
   "hole": null,
   "dealer": [],
-  "peeked": false,
+  "peeked": true,
   "by": [
    "kanywst"
   ]
@@ -71,12 +71,12 @@
  "hands_played": 6,
  "coach": {
   "cost": 0.0,
-  "decisions": 7
+  "decisions": 8
  },
  "players": {
   "kanywst": {
    "hands": 7,
-   "decisions": 7,
+   "decisions": 8,
    "cost": 0.0
   }
  },
