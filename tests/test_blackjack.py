@@ -483,6 +483,21 @@ class LogFile(Sandbox):
         self.assertIn("10u  8 3 11 lost", line)
         self.assertNotIn("->", line)
 
+    def test_the_bet_column_fits_the_widest_bet_the_table_allows(self):
+        # The biggest chip split to four hands and doubled on every one is the
+        # most that can ever be riding. A column it does not fit puts the cards
+        # of that row a character out from every row above it.
+        widest = table(up="2H", cards=("8D", "8H"), bet=25,
+                       hands=[spot(["8D", "3H"], bet=50, doubled=True,
+                                   result="lost") for _ in range(4)])
+        bj.append_log(widest, -200.0, ["2H", "KD"])
+        plain = table(up="2H", cards=("8D", "3H"), bet=1,
+                      hands=[spot(["8D", "3H"], bet=1, result="lost")])
+        bj.append_log(plain, -1.0, ["2H", "KD"])
+        rows = bj.LOG_PATH.read_text(encoding="utf-8").rstrip("\n").split("\n")[-2:]
+        self.assertIn("25->200u", rows[0])
+        self.assertEqual(rows[0].index("8 3 11"), rows[1].index("8 3 11"))
+
     def test_insurance_gets_its_own_field_when_it_was_taken(self):
         # Ten on the hand and five on the hole card: the hand loses both, and
         # -15u on a row that only says 10u is a result nobody can check.
