@@ -760,7 +760,7 @@ def wagered(hand: dict) -> str:
     """
     total = sum(s["bet"] for s in hand["hands"])
     if total == hand["bet"]:
-        return money(total)
+        return money(hand["bet"])
     return f"{bare(hand['bet'])}->{money(total)}"
 
 
@@ -778,7 +778,10 @@ def append_log(state: dict, net: float, dealer: list[str]) -> None:
     if hand["insurance"]:
         fields.append(f"ins {money(hand['insurance'])}")
     fields.append(money(net, signed=True))
-    line = f"  {hand['number']:>5}  {wagered(hand):>7}  {hands}"
+    # Eight is the widest the column can get: the biggest chip is 25 and the
+    # most it can grow to is four hands doubled, so `25->200u` is the longest
+    # bet there is. A column that fits it never has to unalign the page.
+    line = f"  {hand['number']:>5}  {wagered(hand):>8}  {hands}"
     line += "".join(f"  |  {field}" for field in fields)
     # Last, and only when there is one: a login can be 39 characters and the
     # columns before it are read down the page. Every name, not the two a row
