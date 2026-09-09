@@ -11,27 +11,27 @@
 <h2 align="center">Blackjack</h2>
 
 <!-- BLACKJACK:START -->
-<div align="center"><pre><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/label-dealer.svg" align="top" alt="dealer"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/8C.svg" align="top" alt="eight of clubs"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/back.svg" align="top" alt="the dealer's hole card, face down"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/blank.svg" align="top" alt=""></a>
-<a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/label-you.svg" align="top" alt="you"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/QD.svg" align="top" alt="queen of diamonds"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/6D.svg" align="top" alt="six of diamonds"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/AS.svg" align="top" alt="ace of spades"></a></pre></div>
+<div align="center"><pre><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/label-dealer.svg" align="top" alt="dealer"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/8C.svg" align="top" alt="eight of clubs"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/JD.svg" align="top" alt="jack of diamonds"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/blank.svg" align="top" alt=""></a>
+<a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/label-player.svg" align="top" alt="player"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/QD.svg" align="top" alt="queen of diamonds"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/6D.svg" align="top" alt="six of diamonds"></a><a href="https://github.com/kanywst/kanywst#blackjack"><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/AS.svg" align="top" alt="ace of spades"></a></pre></div>
 
-<p align="center">The dealer shows eight, and you have 17.</p>
+<p align="center">Hand 6: the dealer had 18, @kanywst had 17, and it cost 10u. Pick a chip to deal hand 7.</p>
 
-<div align="center"><pre><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Chit+6&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/btn-hit.svg" align="top" alt="hit"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cstand+6&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/btn-stand.svg" align="top" alt="stand"></a></pre></div>
+<div align="center"><pre><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cbet+1+7&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/chip1.svg" align="top" alt="bet 1 unit"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cbet+2+7&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/chip2.svg" align="top" alt="bet 2 units"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cbet+5+7&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/chip5.svg" align="top" alt="bet 5 units"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cbet+10+7&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/chip10.svg" align="top" alt="bet 10 units"></a><a href="https://github.com/kanywst/kanywst/issues/new?title=bj%7Cbet+25+7&body=Just+click+Submit+new+issue.+The+table+updates+in+about+30+seconds."><img src="https://raw.githubusercontent.com/kanywst/kanywst/main/.github/cards/chip25.svg" align="top" alt="bet 25 units"></a></pre></div>
 
 <p align="center">Beat the dealer without going over 21. A click opens a prefilled issue: submit it and the table moves in about 30 seconds.</p>
 
-<p align="center">Shoe 1 · 5.4 decks left · out of it: K 2 5 8 2 3 4 2 5 K 9 6 6 K A 7 4 8 9 T Q 8 6 A · <a href="https://github.com/kanywst/kanywst/blob/main/.github/blackjack.json">all 32</a></p>
+<p align="center">Shoe 1 · 5.4 decks left · out of it: 2 5 8 2 3 4 2 5 K 9 6 6 K A 7 4 8 9 T Q 8 6 A J · <a href="https://github.com/kanywst/kanywst/blob/main/.github/blackjack.json">all 33</a></p>
 
-<p align="center">-18u over 5 hands · 1 player · 0u lost to mistakes</p>
+<p align="center">-28u over 6 hands · 1 player · 0u lost to mistakes</p>
 
 <table align="center">
   <thead>
     <tr><th>Hand</th><th>Player</th><th>Dealer</th><th></th></tr>
   </thead>
   <tbody>
+    <tr><td><code>6</code> <a href="https://github.com/kanywst" title="@kanywst">@kanywst</a></td><td>17 (Q 6 A)</td><td>18 (8 J)</td><td><code>-10u</code></td></tr>
     <tr><td><code>5</code> <a href="https://github.com/kanywst" title="@kanywst">@kanywst</a></td><td>15 (7 8)</td><td>23 bust (4 9 T)</td><td><code>+5u</code></td></tr>
     <tr><td><code>4</code> <a href="https://github.com/kanywst" title="@kanywst">@kanywst</a></td><td>15 (9 6)</td><td>17 (6 K A)</td><td><code>-10u</code></td></tr>
-    <tr><td><code>3</code> <a href="https://github.com/kanywst" title="@kanywst">@kanywst</a></td><td>15 (8 3 4)</td><td>19 (2 2 5 K)</td><td><code>-20u</code></td></tr>
   </tbody>
 </table>
 
