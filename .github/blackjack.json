@@ -38,22 +38,39 @@
    "AC",
    "8S",
    "5S",
-   "7H"
+   "7H",
+   "6D",
+   "7S",
+   "QH"
   ],
   "number": 1
  },
  "hand": {
   "number": 8,
-  "phase": "betting",
-  "bet": 0,
+  "phase": "player",
+  "bet": 25.0,
   "insurance": 0,
-  "hands": [],
+  "hands": [
+   {
+    "cards": [
+     "6D",
+     "QH"
+    ],
+    "bet": 25.0,
+    "doubled": false,
+    "done": false,
+    "surrendered": false,
+    "from_split": false
+   }
+  ],
   "active": 0,
-  "up": null,
+  "up": "7S",
   "hole": null,
   "dealer": [],
   "peeked": false,
-  "by": []
+  "by": [
+   "kanywst"
+  ]
  },
  "result": -3.0,
  "hands_played": 7,
@@ -63,7 +80,7 @@
  },
  "players": {
   "kanywst": {
-   "hands": 7,
+   "hands": 8,
    "decisions": 10,
    "cost": 0.0
   }
