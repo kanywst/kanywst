@@ -8,3 +8,4 @@ A bet written a->b was doubled or split: a went down on the deal, b was riding a
       5        5u  7 8 15 won  |  dealer 4 9 T 23  |  +5u  |  @kanywst
       6       10u  Q 6 A 17 lost  |  dealer 8 J 18  |  -10u  |  @kanywst
       7       25u  7 8 5 20 won  |  dealer A 7 18  |  +25u  |  @kanywst
+      8       25u  6 Q 7 23 bust  |  dealer 7 8 15  |  -25u  |  @kanywst
