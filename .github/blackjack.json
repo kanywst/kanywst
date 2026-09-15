@@ -46,7 +46,8 @@
    "8H",
    "7D",
    "8H",
-   "2S"
+   "2S",
+   "2C"
   ],
   "number": 1
  },
@@ -59,7 +60,8 @@
    {
     "cards": [
      "7D",
-     "2S"
+     "2S",
+     "2C"
     ],
     "bet": 25.0,
     "doubled": false,
@@ -81,12 +83,12 @@
  "hands_played": 8,
  "coach": {
   "cost": 0.0,
-  "decisions": 11
+  "decisions": 12
  },
  "players": {
   "kanywst": {
    "hands": 9,
-   "decisions": 11,
+   "decisions": 12,
    "cost": 0.0
   }
  },
