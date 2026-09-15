@@ -47,52 +47,66 @@
    "7D",
    "8H",
    "2S",
-   "2C"
+   "2C",
+   "QC",
+   "TH"
   ],
   "number": 1
  },
  "hand": {
-  "number": 9,
-  "phase": "player",
-  "bet": 25.0,
+  "number": 10,
+  "phase": "betting",
+  "bet": 0,
   "insurance": 0,
-  "hands": [
-   {
-    "cards": [
-     "7D",
-     "2S",
-     "2C"
-    ],
-    "bet": 25.0,
-    "doubled": false,
-    "done": false,
-    "surrendered": false,
-    "from_split": false
-   }
-  ],
+  "hands": [],
   "active": 0,
-  "up": "8H",
+  "up": null,
   "hole": null,
   "dealer": [],
   "peeked": false,
-  "by": [
-   "kanywst"
-  ]
+  "by": []
  },
- "result": -28.0,
- "hands_played": 8,
+ "result": -3.0,
+ "hands_played": 9,
  "coach": {
   "cost": 0.0,
-  "decisions": 12
+  "decisions": 13
  },
  "players": {
   "kanywst": {
    "hands": 9,
-   "decisions": 12,
+   "decisions": 13,
    "cost": 0.0
   }
  },
  "recent": [
+  {
+   "number": 9,
+   "bet": 25.0,
+   "hands": [
+    {
+     "cards": [
+      "7D",
+      "2S",
+      "2C",
+      "QC"
+     ],
+     "result": "won",
+     "bet": 25.0,
+     "doubled": false
+    }
+   ],
+   "dealer": [
+    "8H",
+    "TH"
+   ],
+   "dealer_total": 18,
+   "insurance": 0,
+   "net": 25.0,
+   "by": [
+    "kanywst"
+   ]
+  },
   {
    "number": 8,
    "bet": 25.0,
@@ -141,32 +155,6 @@
    "dealer_total": 18,
    "insurance": 0,
    "net": 25.0,
-   "by": [
-    "kanywst"
-   ]
-  },
-  {
-   "number": 6,
-   "bet": 10.0,
-   "hands": [
-    {
-     "cards": [
-      "QD",
-      "6D",
-      "AS"
-     ],
-     "result": "lost",
-     "bet": 10.0,
-     "doubled": false
-    }
-   ],
-   "dealer": [
-    "8C",
-    "JD"
-   ],
-   "dealer_total": 18,
-   "insurance": 0,
-   "net": -10.0,
    "by": [
     "kanywst"
    ]
