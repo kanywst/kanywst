@@ -49,22 +49,39 @@
    "2S",
    "2C",
    "QC",
-   "TH"
+   "TH",
+   "TS",
+   "5H",
+   "KC"
   ],
   "number": 1
  },
  "hand": {
   "number": 10,
-  "phase": "betting",
-  "bet": 0,
+  "phase": "player",
+  "bet": 25.0,
   "insurance": 0,
-  "hands": [],
+  "hands": [
+   {
+    "cards": [
+     "TS",
+     "KC"
+    ],
+    "bet": 25.0,
+    "doubled": false,
+    "done": false,
+    "surrendered": false,
+    "from_split": false
+   }
+  ],
   "active": 0,
-  "up": null,
+  "up": "5H",
   "hole": null,
   "dealer": [],
   "peeked": false,
-  "by": []
+  "by": [
+   "kanywst"
+  ]
  },
  "result": -3.0,
  "hands_played": 9,
@@ -74,7 +91,7 @@
  },
  "players": {
   "kanywst": {
-   "hands": 9,
+   "hands": 10,
    "decisions": 13,
    "cost": 0.0
   }
