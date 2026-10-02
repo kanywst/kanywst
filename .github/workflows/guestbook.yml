@@ -16,7 +16,8 @@ jobs:
       contents: write
       issues: write
 
-    # Shared with blackjack.yml, which also commits to README.md. queue: max so
+    # Anything else that commits to README.md from an issue joins this group, so
+    # writes take turns. queue: max so
     # a waiting run is not cancelled by the next arrival. On the job so that
     # runs skipped by the `if:` above never take up a slot.
     concurrency:
