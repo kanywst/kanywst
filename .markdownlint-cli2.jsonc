@@ -9,14 +9,13 @@
     "MD041": false,
     "MD060": false,
     // The only raw HTML in README.md is picture/source/img for the
-    // theme-aware wordmark, and p to centre it and the prose under it
+    // theme-aware wordmark, and p to centre it
     "MD033": {
       "allowed_elements": [
         "picture",
         "source",
         "img",
-        "p",
-        "a"
+        "p"
       ]
     }
   }
