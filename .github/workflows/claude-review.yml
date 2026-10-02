@@ -67,22 +67,17 @@ jobs:
             REPO: ${{ github.repository }}
             PR: ${{ github.event.pull_request.number }}
 
-            This is the GitHub profile repository. The readme is prose plus two blocks that
-            workflows regenerate from issues: a guest book
-            (.github/workflows/guestbook.yml, scripts/update_guestbook.py) and a blackjack
-            table anyone on the internet can play by clicking a link
-            (.github/workflows/blackjack.yml, scripts/blackjack.py, scripts/bjmath.py,
-            state in .github/blackjack.json and .github/blackjack-log.txt).
+            This is the GitHub profile repository. The readme is prose plus a block that a
+            workflow regenerates from issues: a guest book
+            (.github/workflows/guestbook.yml, scripts/update_guestbook.py).
 
-            checks.yml already runs the tests, markdownlint, and the two regeneration
-            checks, so do not spend the review on what a script has answered. Read the diff
-            for what only a reader can catch, and only against the parts it touches:
+            checks.yml already runs markdownlint, so do not spend the review on what a script
+            has answered. Read the diff for what only a reader can catch, and only against
+            the parts it touches:
 
-            1. Untrusted input reaching the readme or the state. An issue title and the
-               login that opened it are written by anyone, and both are interpolated into
-               HTML on a public page and stored in a committed JSON file that the next run
-               reads back. Escape it, bound its length, and treat everything loaded from the
-               state file as hostile — it is only as trustworthy as the run that wrote it.
+            1. Untrusted input reaching the readme. An issue body and the login that
+               opened it are written by anyone, and both are interpolated into HTML on a
+               public page. Escape it and bound its length.
 
             2. The marker contracts. Each script rewrites only what sits between its own
                START and END markers. A change to a marker, or content moved across one,
@@ -96,14 +91,7 @@ jobs:
                repository, so a relative image path resolves against the wrong base and
                silently fails to load.
 
-            5. The game being right, when the diff touches it. Settlement pays 3:2 on a
-               natural and 1:1 otherwise, insurance 2:1; a double or a split changes what is
-               at risk after the bet was made. The shoe is stored as the cards that have
-               come out of it, the hole card is not drawn until it is turned over, and
-               nothing may tell a player the count before the bet. Money that a row cannot
-               account for is a bug even when the arithmetic is right.
-
-            6. Anything that has to be updated by hand. A count or a list in a file that a
+            5. Anything that has to be updated by hand. A count or a list in a file that a
                workflow also writes will go stale, and a live link or a derived number is
                nearly always available instead.
 
