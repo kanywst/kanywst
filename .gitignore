@@ -2,3 +2,6 @@
 
 # Screenshots taken while checking how the README renders. None of them ship.
 /*.png
+
+# Python bytecode
+__pycache__/
