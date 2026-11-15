@@ -7,7 +7,7 @@
 
 Identity, authorization, and cloud native security. Go and Rust.
 
-Lately: [gitsona](https://github.com/kanywst/gitsona), [awesome-authorization](https://github.com/kanywst/awesome-authorization), [i-watched-movies](https://github.com/kanywst/i-watched-movies).
+Lately: [gitsona](https://github.com/kanywst/gitsona), [i-watched-movies](https://github.com/kanywst/i-watched-movies), [awesome-authorization](https://github.com/kanywst/awesome-authorization).
 
 [kanywst.github.io](https://kanywst.github.io/)
 
@@ -27,18 +27,18 @@ Lately: [gitsona](https://github.com/kanywst/gitsona), [awesome-authorization](h
 
 ### Projects
 
-[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-wtfi2-dark.svg"><img alt="wtfi2: Live, visual network-path diagnostic that pinpoints exactly where your Wi-Fi connection dies — and how to fix it. Rust + ratatui TUI." src="./gitsona/project-wtfi2-light.svg" width="49%"></picture>](https://github.com/kanywst/wtfi2)
-[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-y509-dark.svg"><img alt="y509: TUI for X.509 certificate chains: verifies trust, and catches the missing intermediates and bad ordering that break curl but not browsers" src="./gitsona/project-y509-light.svg" width="49%"></picture>](https://github.com/kanywst/y509)
-[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-awesome-authorization-dark.svg"><img alt="awesome-authorization: Actively maintained curated list of authorization and access control: policy engines (OPA, Cedar, Zanzibar/ReBAC), standards (AuthZEN, OAuth), AuthZ-as-a-Service, models, and real-world designs." src="./gitsona/project-awesome-authorization-light.svg" width="49%"></picture>](https://github.com/kanywst/awesome-authorization)
-[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-a2acode-dark.svg"><img alt="a2acode: Serve any ACP coding agent — Claude Code, Codex, opencode — over the A2A protocol, with tool progress, file diffs, and permission prompts preserved." src="./gitsona/project-a2acode-light.svg" width="49%"></picture>](https://github.com/kanywst/a2acode)
-[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-opa-authzen-plugin-dark.svg"><img alt="opa-authzen-plugin: This repository contains an extended version of OPA (OPA-AuthZEN) that implements the OpenID AuthZEN Authorization API 1.0." src="./gitsona/project-opa-authzen-plugin-light.svg" width="49%"></picture>](https://github.com/kanywst/opa-authzen-plugin)
-[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-omega-dark.svg"><img alt="omega: SPIFFE-compatible workload identity + OpenID AuthZEN 1.0 authorization in a single Apache-2.0 binary. Cedar PDP, SPIFFE federation, tamper-evident audit log, Kubernetes operator." src="./gitsona/project-omega-light.svg" width="49%"></picture>](https://github.com/kanywst/omega)
+[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-hammurabi-dark.svg"><img alt="hammurabi: Hammurabi — engineering laws, each with its counter-force, a field guideline and a primary source. English and Japanese." src="./gitsona/project-hammurabi-light.svg" width="49%"></picture>](https://github.com/kanywst/hammurabi)
+[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-wimsey-dark.svg"><img alt="wimsey: A vendor-neutral WIMSE (Workload Identity in Multi System Environments) reference implementation in Rust — WIT, WPT, RFC 9421 HTTP signatures, and mTLS/WIC." src="./gitsona/project-wimsey-light.svg" width="49%"></picture>](https://github.com/kanywst/wimsey)
+[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-howbad-dark.svg"><img alt="howbad: If a coding agent on your machine got prompt-injected right now, how bad would it be? Finds the credentials it could use and asks each provider what they can do." src="./gitsona/project-howbad-light.svg" width="49%"></picture>](https://github.com/kanywst/howbad)
+[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-mcp-opa-authz-dark.svg"><img alt="mcp-opa-authz: MCP server giving LLM agents real authorization answers: evaluate Rego in-process via OPA, or ask an OpenID AuthZEN 1.0 PDP" src="./gitsona/project-mcp-opa-authz-light.svg" width="49%"></picture>](https://github.com/kanywst/mcp-opa-authz)
+[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-brtc-dark.svg"><img alt="brtc: Cost calculator for offline password brute-force attacks: time + USD per GPU profile, with a CI gatekeeper." src="./gitsona/project-brtc-light.svg" width="49%"></picture>](https://github.com/kanywst/brtc)
+[<picture><source media="(prefers-color-scheme: dark)" srcset="./gitsona/project-chonk-dark.svg"><img alt="chonk: See what is eating your disk, why it exists, and the right way to get it back. A TUI that groups every byte by owner and reclaims with each owner's own command." src="./gitsona/project-chonk-light.svg" width="49%"></picture>](https://github.com/kanywst/chonk)
 
 ### Languages over time
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./gitsona/strata-dark.svg">
-  <img alt="Languages by share of code: Go 51%, TypeScript 13%, Rust 9%, Python 5%, HTML 5%." src="./gitsona/strata-light.svg" width="100%">
+  <img alt="Languages by share of code: Go 51%, TypeScript 14%, Rust 9%, Python 5%, HTML 5%." src="./gitsona/strata-light.svg" width="100%">
 </picture>
 
 ### Upstream
