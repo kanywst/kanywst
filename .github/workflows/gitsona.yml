@@ -1,0 +1,39 @@
+name: gitsona
+
+on:
+  schedule:
+    - cron: "23 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gitsona
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 22
+      - name: Redraw the profile
+        run: npx -y --allow-git=all github:kanywst/gitsona "${{ github.repository_owner }}" --out . --quiet
+        env:
+          # The default token sees public activity. For private contribution counts, add a
+          # fine-grained token with read access to your repos as the GITSONA_TOKEN secret.
+          GITHUB_TOKEN: ${{ secrets.GITSONA_TOKEN || secrets.GITHUB_TOKEN }}
+      - name: Commit when something changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md gitsona
+          if git diff --cached --quiet; then
+            echo "No change."
+          else
+            git commit -m "docs: redraw profile with gitsona"
+            git push
+          fi
