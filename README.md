@@ -7,7 +7,7 @@
 
 Identity, authorization, and cloud native security. Go and Rust.
 
-Lately: [trust-me-bro](https://github.com/kanywst/trust-me-bro), [i-just-wanted-a-login-form](https://github.com/kanywst/i-just-wanted-a-login-form), [opa-authzen-plugin](https://github.com/kanywst/opa-authzen-plugin).
+Lately: [mcp-opa-authz](https://github.com/kanywst/mcp-opa-authz), [omega](https://github.com/kanywst/omega), [gitsona](https://github.com/kanywst/gitsona).
 
 [kanywst.github.io](https://kanywst.github.io/)
 
@@ -15,14 +15,14 @@ Lately: [trust-me-bro](https://github.com/kanywst/trust-me-bro), [i-just-wanted-
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./gitsona/traits-dark.svg">
-  <img alt="Upstream (Own repos to Upstream): 65 merged PRs across 47 projects owned by others. Generalist (Specialist to Generalist): 5 languages cover 80% of the code; 20% of the work is security. Every day (In bursts to Every day): Active on 309 of the last 365 days; longest run 103 days. Many projects (Few projects to Many projects): 27 new public repositories this year; the top 3 take 27% of commits" src="./gitsona/traits-light.svg" width="100%">
+  <img alt="Upstream (Own repos to Upstream): 65 merged PRs across 47 projects owned by others. Generalist (Specialist to Generalist): 5 languages cover 80% of the code; 20% of the work is security. Every day (In bursts to Every day): Active on 309 of the last 365 days; longest run 104 days. Many projects (Few projects to Many projects): 27 new public repositories this year; the top 3 take 27% of commits" src="./gitsona/traits-light.svg" width="100%">
 </picture>
 
 ### Rhythm
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./gitsona/rhythm-dark.svg">
-  <img alt="Night owl. 46% of sampled commits land between 21:00 and 01:00, local time." src="./gitsona/rhythm-light.svg" width="100%">
+  <img alt="Night owl. 47% of sampled commits land between 21:00 and 01:00, local time." src="./gitsona/rhythm-light.svg" width="100%">
 </picture>
 
 ### Projects
@@ -56,6 +56,6 @@ Recently merged:
 - [fix(server): use invalid\_request for an unsupported subject\_token\_type and reject any typ other than JWT](https://github.com/dexidp/dex/pull/5150) in `dexidp/dex`, 12 Nov 2026
 - [fix(C-0001): match untrusted registries case-insensitively](https://github.com/kubescape/cel-admission-library/pull/176) in `kubescape/cel-admission-library`, 12 Nov 2026
 
-Drawn by [gitsona](https://github.com/kanywst/gitsona) from public GitHub activity on 16 Nov 2026.
+Drawn by [gitsona](https://github.com/kanywst/gitsona) from public GitHub activity on 17 Nov 2026.
 
 <!-- gitsona:end -->
