@@ -2,7 +2,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./gitsona/hero-dark.svg">
-  <img alt="kt (@kanywst). Security, authorization and identity. Builds security tools and authorization engines in Go, TypeScript and Rust, and lands fixes upstream in dex and spire. Upstream: 68 PRs merged in 49 projects. Most days: 309 of 365 days active. Night owl: 57% of commits 22:00–02:00. Generalist: 4 languages cover 80% of the code." src="./gitsona/hero-light.svg" width="100%">
+  <img alt="kt (@kanywst). Security, authorization and identity. Builds security tools and authorization engines in Go, TypeScript and Rust, and lands fixes upstream in dex and spire. Upstream: 68 PRs merged in 49 projects. Most days: 310 of 365 days active. Night owl: 50% of commits 21:00–01:00. Generalist: 4 languages cover 80% of the code." src="./gitsona/hero-light.svg" width="100%">
 </picture>
 
 Builds security tools and authorization engines in Go, TypeScript and Rust, and lands fixes upstream in dex and spire.
