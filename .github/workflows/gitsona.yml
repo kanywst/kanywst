@@ -2,7 +2,7 @@ name: gitsona
 
 on:
   schedule:
-    - cron: "23 3 * * 1"
+    - cron: "23 3 * * *"
   workflow_dispatch:
 
 permissions:
