@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 22
       - name: Redraw the profile
-        run: npx -y gitsona@0.2.0 "${{ github.repository_owner }}" --out . --quiet
+        run: npx -y gitsona@0.2.1 "${{ github.repository_owner }}" --out . --quiet
         env:
           # The default token sees public activity. For private contribution counts, add a
           # fine-grained token with read access to your repos as the GITSONA_TOKEN secret.
