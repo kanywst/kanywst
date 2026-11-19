@@ -7,7 +7,7 @@
 
 Identity, authorization, and cloud native security. Go and Rust.
 
-Lately: [visado](https://github.com/kanywst/visado), [gitsona](https://github.com/kanywst/gitsona), [dotfiles](https://github.com/kanywst/dotfiles).
+Lately: [dotfiles](https://github.com/kanywst/dotfiles), [visado](https://github.com/kanywst/visado), [gitsona](https://github.com/kanywst/gitsona).
 
 [kanywst.github.io](https://kanywst.github.io/)
 
@@ -15,14 +15,14 @@ Lately: [visado](https://github.com/kanywst/visado), [gitsona](https://github.co
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./gitsona/traits-dark.svg">
-  <img alt="Upstream (Own repos to Upstream): 68 merged PRs across 49 projects owned by others. Generalist (Specialist to Generalist): 5 languages cover 80% of the code; 19% of the work is security. Every day (In bursts to Every day): Active on 309 of the last 365 days; longest run 106 days. Many projects (Few projects to Many projects): 28 new public repositories this year; the top 3 take 29% of commits" src="./gitsona/traits-light.svg" width="100%">
+  <img alt="Upstream (Own repos to Upstream): 68 merged PRs across 49 projects owned by others. Generalist (Specialist to Generalist): 5 languages cover 80% of the code; 19% of the work is security. Every day (In bursts to Every day): Active on 310 of the last 365 days; longest run 106 days. Many projects (Few projects to Many projects): 28 new public repositories this year; the top 3 take 27% of commits" src="./gitsona/traits-light.svg" width="100%">
 </picture>
 
 ### Rhythm
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./gitsona/rhythm-dark.svg">
-  <img alt="Night owl. 56% of sampled commits land between 22:00 and 02:00, local time." src="./gitsona/rhythm-light.svg" width="100%">
+  <img alt="Night owl. 50% of sampled commits land between 22:00 and 02:00, local time." src="./gitsona/rhythm-light.svg" width="100%">
 </picture>
 
 ### Projects
